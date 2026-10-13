@@ -63,10 +63,20 @@ button,input{font:inherit;color:inherit}
 .btn.quiet:hover{color:var(--ink);background:var(--surface-2)}
 .btn.danger{color:var(--err)}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.sm{min-height:34px;padding:0 12px;font-size:14px;border-radius:9px}
+.label-acts{display:flex;align-items:center;gap:8px;margin-left:auto}
+.snd{display:grid;gap:10px;padding:2px 0 14px;margin-bottom:12px;border-bottom:1px solid var(--line)}
+.snd-row{display:flex;align-items:center;gap:12px}
+.snd-row b{font-weight:600;font-size:15px}
+.snd input[type=range]{flex:1;min-width:0;accent-color:var(--go)}
+.snd-test{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.snd-test span{font-size:13px;color:var(--muted);margin-right:2px}
 
 /* app bar */
 .appbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;padding-block:18px}
-.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand{display:flex;align-items:center;gap:12px;min-width:0;color:inherit;text-decoration:none;border-radius:12px;padding:4px 8px 4px 4px;margin:-4px -8px -4px -4px}
+.brand:hover{background:var(--surface)}
+.brand:hover .logo{background:var(--go);color:var(--on-go)}
 .logo{width:40px;height:40px;border-radius:11px;background:var(--ink);color:var(--surface);display:grid;place-items:center;flex:none}
 .logo .i{width:22px;height:22px}
 .brand h1{margin:0;font-size:20px;line-height:1.2;font-weight:700;letter-spacing:-.01em}
@@ -98,6 +108,8 @@ button,input{font:inherit;color:inherit}
 .resume b{display:block;font-size:16px}
 .resume span{font-size:14px;color:var(--muted)}
 .resume .bar{width:140px}
+.rm{width:38px;height:38px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none}
+.rm:hover{color:var(--err);background:var(--err-soft)}
 .back-row{display:flex}
 .how ol{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .how li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;align-content:start;padding:16px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line)}
@@ -302,7 +314,9 @@ button,input{font:inherit;color:inherit}
 .foot{margin-top:32px;font-size:13px;color:var(--muted)}
 
 /* overlays */
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(560px,calc(100% - 32px));background:var(--ink);color:var(--surface);padding:12px 18px;border-radius:12px;font-size:15px;box-shadow:var(--lift);z-index:20}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:min(560px,calc(100% - 32px));display:flex;align-items:center;gap:16px;background:var(--ink);color:var(--surface);padding:12px 12px 12px 18px;border-radius:12px;font-size:15px;box-shadow:var(--lift);z-index:20}
+.toast-act{border:0;background:transparent;color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:6px 8px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.toast-act:hover{background:color-mix(in srgb,var(--surface) 14%,transparent)}
 .dropper{position:fixed;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 85%,transparent);z-index:30;pointer-events:none}
 .dropper div{display:flex;align-items:center;gap:12px;border:2px dashed var(--go);border-radius:18px;padding:32px 40px;background:var(--surface);font-size:20px;font-weight:600}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
@@ -311,10 +325,10 @@ button,input{font:inherit;color:inherit}
 <body>
 <div class="wrap">
   <header class="appbar">
-    <div class="brand">
+    <a class="brand" href="#" id="brandHome" title="На главный экран">
       <span class="logo" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg></span>
       <div><h1>Привязка QR экземпляров</h1><p>Для шаблона «Состав грузомест»</p></div>
-    </div>
+    </a>
     <ol class="steps" id="steps" aria-label="Шаги">
       <li data-step="1"><span class="dot">1</span><span class="lbl">Шаблон</span></li>
       <li data-step="2"><span class="dot">2</span><span class="lbl">Сканирование</span></li>
@@ -377,7 +391,10 @@ button,input{font:inherit;color:inherit}
           <div id="labelWork">
             <div class="label-top">
               <span class="box" id="boxChip"><svg class="i" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span id="boxText">Коробка</span></span>
-              <button class="scanner" type="button" id="scanner"><span class="pulse"></span><span id="scannerText">Сканер готов</span></button>
+              <div class="label-acts">
+                <button class="btn quiet sm" type="button" id="btnUnselect" hidden><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Снять выбор</button>
+                <button class="scanner" type="button" id="scanner"><span class="pulse"></span><span id="scannerText">Сканер готов</span></button>
+              </div>
             </div>
             <div class="label-body">
               <div class="ring" id="ring" hidden>
@@ -472,7 +489,11 @@ button,input{font:inherit;color:inherit}
           <div class="tabpanel" id="panelLog" role="tabpanel"><ul class="log" id="log"></ul></div>
           <div class="tabpanel" id="panelSet" role="tabpanel" hidden>
             <label class="opt" for="optStrict"><span><b>Товар перед каждым QR</b><small>Медленнее, но надёжнее, если товары на столе перемешаны</small></span><input type="checkbox" class="switch" id="optStrict"></label>
-            <label class="opt" for="optSound"><span><b>Звуковые сигналы</b><small>Высокий — привязан, двойной — уже был, низкий — ошибка</small></span><input type="checkbox" class="switch" id="optSound" checked></label>
+            <label class="opt" for="optSound"><span><b>Звуковые сигналы</b><small>Звонкий восходящий — привязан, «тук-тук» — уже был, низкий длинный — ошибка</small></span><input type="checkbox" class="switch" id="optSound" checked></label>
+            <div class="snd">
+              <div class="snd-row"><label for="optVolume"><b>Громкость</b></label><input type="range" id="optVolume" min="0" max="100" step="5" value="80"></div>
+              <div class="snd-test"><span>Послушать:</span><button class="btn sm" type="button" data-snd="ok">Привязан</button><button class="btn sm" type="button" data-snd="group">Товар готов</button><button class="btn sm" type="button" data-snd="warn">Уже был</button><button class="btn sm" type="button" data-snd="err">Ошибка</button></div>
+            </div>
             <div class="set-actions">
               <button class="btn" type="button" id="btnUndo"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>Отменить последний скан</button>
               <button class="btn danger" type="button" id="btnClear"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Очистить все коды</button>
@@ -497,7 +518,7 @@ button,input{font:inherit;color:inherit}
 <input type="file" id="fileInput" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
 <input type="file" id="archiveInput" accept=".xlsx" multiple hidden>
 <div class="dropper" id="dropper" hidden><div><svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>Отпустите файл, чтобы загрузить шаблон</div></div>
-<div class="toast" id="toast" role="status" hidden></div>
+<div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button class="toast-act" type="button" id="toastAct" hidden></button></div>
 
 <script>/* JSZip 3.10.1, MIT license, https://stuk.github.io/jszip/ */
 /*!
@@ -854,7 +875,7 @@ let expanded = new Set();
 let filter = 'all';
 let query = '';
 let history = store.get(HKEY, {}) || {};
-const opts = Object.assign({ strict: false, sound: true }, store.get(OKEY, {}) || {});
+const opts = Object.assign({ strict: false, sound: true, volume: 80 }, store.get(OKEY, {}) || {});
 
 function buildGroups() {
   groups = new Map(); order = []; bcIndex = new Map();
@@ -918,28 +939,53 @@ function openBook(b, o) {
 
 /* ---------- feedback, sound, log ---------- */
 let actx = null;
-function tone(freq, dur, type, when, gain) {
-  if (!opts.sound) return;
+function audio() {
+  if (!opts.sound) return null;
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
     if (actx.state === 'suspended') actx.resume();
-    const t0 = actx.currentTime + (when || 0);
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.type = type || 'sine'; o.frequency.value = freq;
+    return actx;
+  } catch (e) { return null; }
+}
+/* one note: soft attack, short hold, smooth fade; optional pitch glide and low-pass for the error buzz */
+function note(freq, at, dur, o) {
+  const a = audio();
+  if (!a) return;
+  o = o || {};
+  const vol = Math.max(0, Math.min(1, (opts.volume == null ? 80 : opts.volume) / 100));
+  if (!vol) return;
+  try {
+    const t0 = a.currentTime + 0.01 + at;
+    const osc = a.createOscillator(), g = a.createGain();
+    osc.type = o.type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    if (o.glide) osc.frequency.exponentialRampToValueAtTime(freq * o.glide, t0 + dur);
+    const peak = (o.gain || 0.2) * vol;
+    const atk = o.attack || 0.012;
     g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(gain || 0.14, t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(peak, t0 + atk);
+    g.gain.setValueAtTime(peak, t0 + Math.max(atk, dur * (o.hold == null ? 0.3 : o.hold)));
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-    o.connect(g); g.connect(actx.destination);
-    o.start(t0); o.stop(t0 + dur + 0.03);
+    let src = osc;
+    if (o.lowpass) { const f = a.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.lowpass; osc.connect(f); src = f; }
+    src.connect(g); g.connect(a.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.05);
   } catch (e) { /* sound is optional */ }
 }
+const BUZZ = { type: 'square', gain: 0.13, lowpass: 1500, hold: 0.6, attack: 0.02 };
 const SND = {
-  ok: () => tone(1320, 0.08),
-  info: () => tone(740, 0.06, 'sine', 0, 0.08),
-  warn: () => { tone(880, 0.06); tone(880, 0.06, 'sine', 0.1); },
-  err: () => { tone(196, 0.22, 'square', 0, 0.07); tone(147, 0.32, 'square', 0.25, 0.07); },
-  group: () => { tone(988, 0.09); tone(1319, 0.16, 'sine', 0.1); },
-  all: () => { tone(784, 0.1); tone(988, 0.1, 'sine', 0.11); tone(1319, 0.26, 'sine', 0.22); },
+  /* QR привязан: тот же чистый звон, две ноты вверх */
+  ok: () => { note(1319, 0, 0.16, { gain: 0.2 }); note(1760, 0.11, 0.26, { gain: 0.18 }); },
+  /* товар или коробка отсканированы: короткий мягкий сигнал */
+  info: () => note(880, 0, 0.12, { gain: 0.1 }),
+  /* уже был, повтор пропущен: нейтральное «тук-тук» */
+  warn: () => { note(660, 0, 0.1, { type: 'triangle', gain: 0.24 }); note(660, 0.16, 0.1, { type: 'triangle', gain: 0.24 }); },
+  /* ошибка: низкий нисходящий двойной гудок, почти секунда */
+  err: () => { note(440, 0, 0.3, Object.assign({ glide: 0.94 }, BUZZ)); note(330, 0.34, 0.5, Object.assign({ glide: 0.9 }, BUZZ)); },
+  /* товар готов: три ноты вверх */
+  group: () => { note(1047, 0, 0.16, { gain: 0.18 }); note(1319, 0.12, 0.16, { gain: 0.18 }); note(1568, 0.24, 0.32, { gain: 0.18 }); },
+  /* вся поставка готова: четыре ноты вверх */
+  all: () => { note(1047, 0, 0.16, { gain: 0.18 }); note(1319, 0.13, 0.16, { gain: 0.18 }); note(1568, 0.26, 0.16, { gain: 0.18 }); note(2093, 0.39, 0.6, { gain: 0.16, hold: 0.2 }); },
   none: () => {}
 };
 const RES_ICON = { ok: 'check', warn: 'alert', err: 'x', info: 'info' };
@@ -967,12 +1013,16 @@ function logEvt(lvl, text) {
   logItems.unshift({ ts: Date.now(), lvl: lvl, text: text });
   if (logItems.length > 80) logItems.length = 80;
 }
-let toastTimer = null;
-function toast(text) {
-  const t = $('toast');
-  t.textContent = text; t.hidden = false;
+let toastTimer = null, toastFn = null;
+function toast(text, actLabel, actFn) {
+  const t = $('toast'), b = $('toastAct');
+  $('toastText').textContent = text;
+  toastFn = actFn || null;
+  b.hidden = !actFn;
+  if (actFn) b.textContent = actLabel;
+  t.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.hidden = true; }, 4500);
+  toastTimer = setTimeout(() => { t.hidden = true; toastFn = null; }, actFn ? 8000 : 4500);
 }
 
 /* ---------- scanning ---------- */
@@ -1010,7 +1060,7 @@ function onScan(raw) {
   render();
 }
 function onCargo(c) {
-  cur.cargo = c; cur.explicit = true;
+  cur.cargo = c; cur.explicit = true; cur.explicitByClick = false;
   if (cur.key && groups.get(cur.key).cargo !== c) {
     const g = groups.get(cur.key);
     const k2 = c + '|' + (g.barcode || ('#' + g.article));
@@ -1090,10 +1140,19 @@ function removeCode(i) {
 function selectGroup(key) {
   const g = groups.get(key);
   if (!g) return;
+  if (cur.key === key) { unselect(); return; }
   cur.key = key; cur.cargo = g.cargo;
-  if (cargos.length > 1) cur.explicit = true;
+  if (cargos.length > 1 && !cur.explicit) { cur.explicit = true; cur.explicitByClick = true; }
   const left = g.need - g.done;
-  feedback('info', 'Товар: ' + g.article, left > 0 ? 'Выбран вручную. Сканируйте QR-коды, осталось ' + left + ' из ' + g.need + '.' : 'Выбран вручную. Все ' + g.need + ' уже с QR.');
+  feedback('info', 'Товар: ' + g.article, (left > 0 ? 'Выбран вручную, осталось ' + left + ' из ' + g.need + '.' : 'Выбран вручную, все ' + g.need + ' уже с QR.') + ' Чтобы отменить, нажмите на него ещё раз или «Снять выбор».');
+  render();
+}
+function unselect() {
+  if (!cur.key) return;
+  const g = groups.get(cur.key);
+  cur.key = null;
+  if (cur.explicitByClick) { cur.explicit = false; cur.explicitByClick = false; }
+  feedback('info', 'Выбор снят', (g ? '«' + g.article + '» больше не выбран. ' : '') + 'Отсканируйте товар или выберите его в списке.', 'none');
   render();
 }
 
@@ -1158,6 +1217,21 @@ async function resumeSaved(name) {
     logEvt('info', 'Восстановлено сканирование от ' + fmtDate(s.savedAt) + '.');
   } catch (e) { toast('Не получилось восстановить: ' + (e && e.message ? e.message : e)); }
   render();
+}
+function removeSaved(name) {
+  const sessions = store.get(SKEY, {}) || {};
+  const saved = sessions[name];
+  if (!saved) return;
+  delete sessions[name];
+  store.set(SKEY, sessions);
+  renderStart();
+  const no = supplyNo(name);
+  toast((no ? 'Заявка ' + no : '«' + name + '»') + ' убрана из списка.', 'Вернуть', () => {
+    const again = store.get(SKEY, {}) || {};
+    again[name] = saved;
+    store.set(SKEY, again);
+    renderStart();
+  });
 }
 async function addArchive(files) {
   let added = 0, n = 0;
@@ -1265,7 +1339,8 @@ function renderStart() {
     const pct = s.need ? Math.round(100 * s.done / s.need) : 0;
     return '<div class="resume"><div class="r-main"><b>' + esc(no ? 'Заявка ' + no : s.name) + '</b><span>' + esc(s.done + ' из ' + s.need + ' QR, ' + fmtDate(s.savedAt) + (s.exportedAt ? ', файл скачан' : '')) + '</span></div>' +
       '<span class="bar' + (s.done === s.need ? ' full' : '') + '"><span style="width:' + pct + '%"></span></span>' +
-      '<button class="btn" type="button" data-resume="' + esc(s.name) + '">Продолжить</button></div>';
+      '<button class="btn" type="button" data-resume="' + esc(s.name) + '">Продолжить</button>' +
+      '<button class="rm" type="button" data-remove="' + esc(s.name) + '" title="Убрать из списка" aria-label="Убрать ' + esc(no ? 'заявку ' + no : s.name) + ' из списка">' + svg('x') + '</button></div>';
   }).join('') : '';
 }
 function renderWork() {
@@ -1285,6 +1360,7 @@ function renderWork() {
 function renderLabel(t, complete) {
   $('labelWork').hidden = complete;
   $('labelDone').hidden = !complete;
+  $('btnUnselect').hidden = complete || !cur.key;
   if (complete) {
     $('doneTitle').textContent = 'Все ' + fmtN(t.need) + ' ' + plural(t.need, 'экземпляр привязан', 'экземпляра привязаны', 'экземпляров привязаны');
     $('doneText').textContent = book.exportedAt ? 'Файл скачан. Загрузите его в заявку в личном кабинете. Если что-то поменяете, скачайте файл ещё раз.' : 'Повторов нет, количество совпадает с шаблоном. Скачайте файл и загрузите его в заявку в личном кабинете.';
@@ -1331,7 +1407,7 @@ function renderItems() {
     const pct = g.need ? Math.round(100 * g.done / g.need) : 0;
     const open = expanded.has(key);
     const cls = 'item' + (key === cur.key ? ' cur' : '') + (done ? ' done' : (g.done ? ' part' : ''));
-    html += '<li class="' + cls + '" data-key="' + esc(key) + '" style="--p:' + pct + '%">' +
+    html += '<li class="' + cls + '" data-key="' + esc(key) + '" style="--p:' + pct + '%" title="' + (key === cur.key ? 'Нажмите ещё раз, чтобы снять выбор' : 'Нажмите, чтобы выбрать вручную') + '">' +
       '<span class="st">' + (done ? svg('check') : '') + '</span>' +
       '<div class="it-main"><b>' + esc(g.article || '(без артикула)') + '</b><span>' + esc(g.barcode + (multi ? ', коробка ' + tail(g.cargo, 6) : '')) + '</span></div>' +
       '<div class="it-prog"><span class="bar"><span style="width:' + pct + '%"></span></span><span class="n">' + g.done + ' из ' + g.need + '</span></div>' +
@@ -1391,7 +1467,8 @@ function renderSide(t, complete) {
 
 /* ---------- keep the scanner field armed ---------- */
 const scanInput = $('scanInput');
-function isTyping(el) { return el && ((el.tagName === 'INPUT' && el.type !== 'checkbox' && el.type !== 'file') || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'); }
+const TEXT_TYPES = new Set(['text', 'search', 'email', 'number', 'tel', 'url', 'password']);
+function isTyping(el) { return el && ((el.tagName === 'INPUT' && TEXT_TYPES.has(el.type)) || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'); }
 function updateScanner() {
   const on = screen === 'work' && document.activeElement === scanInput && document.hasFocus();
   $('scanner').classList.toggle('off', !on);
@@ -1418,15 +1495,17 @@ $('scanForm').addEventListener('submit', (e) => { e.preventDefault(); const v = 
 scanInput.addEventListener('keydown', (e) => {
   if (e.key === 'Tab' && scanInput.value.trim()) { e.preventDefault(); const v = scanInput.value; scanInput.value = ''; onScan(v); }
   else if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z' || e.key === 'я') && !scanInput.value) { e.preventDefault(); undo(); }
-  else if (e.key === 'Escape') { scanInput.value = ''; cur.key = null; render(); }
+  else if (e.key === 'Escape') { scanInput.value = ''; unselect(); }
 });
 $('scanner').addEventListener('click', refocus);
+$('btnUnselect').addEventListener('click', unselect);
 const pickFile = () => $('fileInput').click();
 $('dropZone').addEventListener('click', pickFile);
 $('dropZone').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pickFile(); } });
 $('btnOwn').addEventListener('click', pickFile);
 $('btnChange').addEventListener('click', () => showScreen('start'));
 $('btnBack').addEventListener('click', () => { if (book) showScreen('work'); });
+$('brandHome').addEventListener('click', (e) => { e.preventDefault(); if (screen !== 'start') showScreen('start'); window.scrollTo(0, 0); });
 $('btnDemo').addEventListener('click', openDemo);
 $('fileInput').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; loadFile(f); });
 $('btnExport').addEventListener('click', onExportClick);
@@ -1450,11 +1529,21 @@ $('btnResume').addEventListener('click', () => {
   saveSession(); render();
 });
 $('btnResumeNo').addEventListener('click', () => { pendingResume = null; $('resumeBanner').hidden = true; saveSession(); render(); });
-$('resumeList').addEventListener('click', (e) => { const b = e.target.closest('[data-resume]'); if (b) resumeSaved(b.dataset.resume); });
+$('resumeList').addEventListener('click', (e) => {
+  const rm = e.target.closest('[data-remove]');
+  if (rm) { removeSaved(rm.dataset.remove); return; }
+  const b = e.target.closest('[data-resume]');
+  if (b) resumeSaved(b.dataset.resume);
+});
+$('toastAct').addEventListener('click', () => { const fn = toastFn; toastFn = null; $('toast').hidden = true; clearTimeout(toastTimer); if (fn) fn(); });
 $('optStrict').checked = !!opts.strict;
 $('optSound').checked = !!opts.sound;
 $('optStrict').addEventListener('change', (e) => { opts.strict = e.target.checked; store.set(OKEY, opts); if (opts.strict) cur.key = null; render(); });
 $('optSound').addEventListener('change', (e) => { opts.sound = e.target.checked; store.set(OKEY, opts); if (opts.sound) SND.ok(); });
+$('optVolume').value = String(opts.volume == null ? 80 : opts.volume);
+$('optVolume').addEventListener('input', (e) => { opts.volume = +e.target.value; store.set(OKEY, opts); });
+$('optVolume').addEventListener('change', () => { const was = opts.sound; opts.sound = true; SND.ok(); opts.sound = was; });
+$('panelSet').addEventListener('click', (e) => { const b = e.target.closest('[data-snd]'); if (!b) return; const was = opts.sound; opts.sound = true; (SND[b.dataset.snd] || SND.ok)(); opts.sound = was; });
 $('items').addEventListener('click', (e) => {
   const btn = e.target.closest('[data-act]');
   if (btn && btn.dataset.act === 'del') { removeCode(+btn.dataset.i); return; }
