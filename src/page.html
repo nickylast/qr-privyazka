@@ -410,8 +410,8 @@ button,input{font:inherit;color:inherit}
             <div class="label-top">
               <span class="box" id="boxChip"><svg class="i" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span id="boxText">Коробка</span></span>
               <div class="label-acts">
-                <button class="btn quiet sm" type="button" id="btnUnselect" hidden><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Снять выбор</button>
                 <button class="scanner" type="button" id="scanner"><span class="pulse"></span><span id="scannerText">Сканер готов</span></button>
+                <button class="btn quiet sm" type="button" id="btnUnselect" hidden><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Снять выбор</button>
               </div>
             </div>
             <div class="label-body">
@@ -1392,6 +1392,14 @@ function selectGroup(key) {
   feedback('info', 'Товар: ' + g.article, (d ? d + '. ' : '') + (left > 0 ? 'Выбран вручную, осталось ' + left + ' из ' + g.need + '.' : 'Выбран вручную, все ' + g.need + ' уже с QR.') + ' Чтобы отменить, нажмите на него ещё раз или «Снять выбор».', 'product');
   render();
 }
+function showLabel() {
+  const el = $('label');
+  if (!el || !el.scrollIntoView) return;
+  const r = el.getBoundingClientRect();
+  if (r.top >= 0 && r.bottom <= window.innerHeight) return;
+  const calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  el.scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' });
+}
 function unselect() {
   if (!cur.key) return;
   const g = groups.get(cur.key);
@@ -1958,9 +1966,15 @@ function refocus() {
   updateScanner();
 }
 scanInput.addEventListener('focus', updateScanner);
-scanInput.addEventListener('blur', () => setTimeout(updateScanner, 0));
+scanInput.addEventListener('blur', () => setTimeout(updateScanner, 300));
 window.addEventListener('focus', () => setTimeout(refocus, 0));
-window.addEventListener('blur', () => setTimeout(updateScanner, 0));
+window.addEventListener('blur', () => setTimeout(updateScanner, 300));
+/* pressing a button or a product row keeps the scanner field focused: no blur, nothing shifts under the cursor, scans keep landing */
+document.addEventListener('mousedown', (e) => {
+  if (screen !== 'work' || document.activeElement !== scanInput) return;
+  const t = e.target && e.target.closest ? e.target.closest('button, li.item, .chip') : null;
+  if (t) e.preventDefault();
+});
 document.addEventListener('click', (e) => { if (e.target && e.target.closest && e.target.closest('select')) return; setTimeout(refocus, 0); });
 document.addEventListener('keydown', (e) => {
   if (screen !== 'work' || isTyping(document.activeElement)) return;
@@ -2035,8 +2049,9 @@ $('items').addEventListener('click', (e) => {
   const key = li.dataset.key;
   if (btn && btn.dataset.act === 'toggle') { if (expanded.has(key)) expanded.delete(key); else expanded.add(key); renderItems(); return; }
   if (pickAlias) { saveAlias(pickAlias, key); return; }
-  if (verify.on) { lastActionAt = Date.now(); verifyProduct([key]); saveSession(); render(); return; }
+  if (verify.on) { lastActionAt = Date.now(); verifyProduct([key]); saveSession(); render(); showLabel(); return; }
   selectGroup(key);
+  if (cur.key) showLabel();
 });
 $('filters').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (b) { filter = b.dataset.f; renderItems(); } });
 $('search').addEventListener('input', (e) => { query = e.target.value; renderItems(); });
