@@ -146,7 +146,29 @@ button,input{font:inherit;color:inherit}
 .scanner.off{background:var(--warn-soft);color:var(--warn);cursor:pointer}
 .scanner.off .pulse{animation:none}
 @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,currentColor 45%,transparent)}100%{box-shadow:0 0 0 10px transparent}}
-.label-body{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:center}
+.label-body{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:24px;align-items:center}
+.title-row{display:flex;align-items:center;gap:14px;min-width:0}
+.title-col{min-width:0}
+.thumb{width:72px;height:72px;border-radius:12px;object-fit:cover;background:var(--surface-2);border:1px solid var(--line);flex:none}
+.pname{margin:4px 0 0;font-size:16px;color:var(--muted)}
+.attrs{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.attr{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);font-size:15px;font-weight:600}
+.attr em{font-style:normal;font-size:13px;font-weight:600;color:var(--warn)}
+.attr.changed{border-color:var(--warn);background:var(--warn-soft)}
+.sw{display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid color-mix(in srgb,var(--ink) 30%,transparent);flex:none;vertical-align:-2px;margin-right:6px}
+.attr .sw{width:16px;height:16px;margin-right:0}
+.size-tag{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:132px;padding:14px 16px;border-radius:14px;border:2px solid var(--ink);text-align:center}
+.size-tag small{font-size:13px;color:var(--muted)}
+.size-tag b{font-size:38px;line-height:1.05;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.size-tag span{font-size:14px;font-weight:600}
+.size-tag em{font-style:normal;font-size:12px;font-weight:700;color:var(--warn);margin-top:4px}
+.size-tag.changed{border-color:var(--warn);background:var(--warn-soft)}
+.label.verifying{box-shadow:0 0 0 3px var(--go-soft),var(--lift)}
+.label.verifying .lead{color:var(--go);font-weight:600}
+.r-acts{grid-column:2;display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.btn[aria-pressed="true"]{background:var(--go-soft);border-color:var(--go);color:var(--go)}
+.items.picking .item{outline:2px dashed var(--go);outline-offset:-4px}
+.sel{min-height:36px;padding:0 10px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:14px}
 .ring{position:relative;width:150px;height:150px;flex:none}
 .ring svg{width:150px;height:150px;transform:rotate(-90deg)}
 .ring .track{fill:none;stroke:var(--line);stroke-width:12}
@@ -172,6 +194,8 @@ button,input{font:inherit;color:inherit}
   .label-body,.done-state{grid-template-columns:minmax(0,1fr);justify-items:start;gap:16px}
   .ring,.ring svg,.big-ic{width:120px;height:120px}
   .ring-txt b{font-size:36px}
+  .size-tag{flex-direction:row;flex-wrap:wrap;gap:4px 10px;min-width:0;padding:8px 14px;justify-self:start}
+  .size-tag b{font-size:28px}
   .label-txt h2{font-size:26px}
   .done-ic{width:72px;height:72px}
   .done-state h2{font-size:24px}
@@ -282,8 +306,8 @@ button,input{font:inherit;color:inherit}
 .issues li{padding-left:10px;border-left:3px solid var(--line);overflow-wrap:anywhere}
 .issues li.err{border-left-color:var(--err)}.issues li.warn{border-left-color:var(--warn)}.issues li.info{border-left-color:var(--go)}
 .tabs{padding:0}
-.tablist{display:flex;gap:4px;padding:8px 8px 0;border-bottom:1px solid var(--line)}
-.tablist button{border:0;background:transparent;padding:10px 12px;border-radius:8px 8px 0 0;font-size:15px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tablist{display:flex;gap:2px;padding:8px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto}
+.tablist button{border:0;background:transparent;padding:10px 9px;border-radius:8px 8px 0 0;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tablist button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
 .tabpanel{padding:14px 16px 16px}
 .log{list-style:none;margin:0;padding:0;max-height:360px;overflow:auto;display:grid}
@@ -360,6 +384,7 @@ button,input{font:inherit;color:inherit}
         <div><b id="fileTitle">—</b><span class="meta" id="fileMeta"></span></div>
       </div>
       <div class="tb-actions">
+        <button class="btn" type="button" id="btnVerify" aria-pressed="false" title="Сверить изделия с файлом: QR и штрихкод одного изделия"><svg class="i" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg><span id="verifyText">Проверка</span></button>
         <button class="btn" type="button" id="btnChange">Другой файл</button>
         <button class="btn primary" type="button" id="btnExport"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v12M7 11l5 5 5-5"/><path d="M5 20h14"/></svg>Скачать файл</button>
       </div>
@@ -397,10 +422,12 @@ button,input{font:inherit;color:inherit}
               <div class="big-ic" id="bigIc"><svg class="i" viewBox="0 0 24 24" id="bigIcSvg"><path d="M3 5v14M6 5v14M10 5v14M13 5v14M17 5v14M21 5v14"/></svg></div>
               <div class="label-txt">
                 <p class="lead" id="lead">Следующий шаг</p>
-                <h2 id="title">Отсканируйте товар</h2>
+                <div class="title-row"><img class="thumb" id="thumb" alt="" hidden><div class="title-col"><h2 id="title">Отсканируйте товар</h2><p class="pname" id="pname" hidden></p></div></div>
+                <div class="attrs" id="attrs" hidden></div>
                 <p class="hint" id="hint">Штрихкод с этикетки товара, затем QR-коды всех его экземпляров</p>
                 <p class="code" id="code"></p>
               </div>
+              <div class="size-tag" id="sizeTag" hidden><small>Размер</small><b id="sizeVal"></b><span id="sizeWords" hidden></span><em id="sizeChanged" hidden>другой размер</em></div>
             </div>
           </div>
           <div class="done-state" id="labelDone" hidden>
@@ -417,6 +444,7 @@ button,input{font:inherit;color:inherit}
           <span class="r-ic" id="resIc"></span>
           <b id="resT">Готов к сканированию</b>
           <span id="resD">Подключите сканер и сканируйте: сначала товар, потом его QR-коды.</span>
+          <div class="r-acts" id="resActs" hidden></div>
         </div>
 
         <form class="field" id="scanForm" autocomplete="off">
@@ -477,11 +505,14 @@ button,input{font:inherit;color:inherit}
           <div class="tablist" role="tablist">
             <button type="button" role="tab" id="tabLog" aria-selected="true" aria-controls="panelLog">Журнал</button>
             <button type="button" role="tab" id="tabSet" aria-selected="false" aria-controls="panelSet">Настройки</button>
+            <button type="button" role="tab" id="tabCat" aria-selected="false" aria-controls="panelCat">Товары</button>
             <button type="button" role="tab" id="tabArc" aria-selected="false" aria-controls="panelArc">Архив</button>
           </div>
           <div class="tabpanel" id="panelLog" role="tabpanel"><ul class="log" id="log"></ul></div>
           <div class="tabpanel" id="panelSet" role="tabpanel" hidden>
             <label class="opt" for="optStrict"><span><b>Товар перед каждым QR</b><small>Медленнее, но надёжнее, если товары на столе перемешаны</small></span><input type="checkbox" class="switch" id="optStrict"></label>
+            <label class="opt" for="optBatch"><span><b>Сверять номер этикетки с пачкой</b><small>Если QR похож на этикетку из пачки другого товара, попрошу отсканировать его ещё раз</small></span><input type="checkbox" class="switch" id="optBatch" checked></label>
+            <label class="opt" for="optPause"><span><b>Сбрасывать товар после паузы</b><small>После перерыва штрихкод товара нужно отсканировать заново</small></span><select class="sel" id="optPause"><option value="0">Не сбрасывать</option><option value="2">2 мин</option><option value="3">3 мин</option><option value="5">5 мин</option><option value="10">10 мин</option></select></label>
             <label class="opt" for="optSound"><span><b>Звуковые сигналы</b><small>Звонкий восходящий — привязан, «тук-тук» — уже был, низкий длинный — ошибка</small></span><input type="checkbox" class="switch" id="optSound" checked></label>
             <div class="snd">
               <div class="snd-row"><label for="optVolume"><b>Громкость</b></label><input type="range" id="optVolume" min="0" max="100" step="5" value="80"></div>
@@ -492,6 +523,15 @@ button,input{font:inherit;color:inherit}
               <button class="btn danger" type="button" id="btnClear"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>Очистить все коды</button>
             </div>
             <p class="hint-s">Ctrl+Z отменяет последний скан, Esc сбрасывает выбранный товар.</p>
+          </div>
+          <div class="tabpanel" id="panelCat" role="tabpanel" hidden>
+            <p id="catText"></p>
+            <div class="set-actions">
+              <button class="btn" type="button" id="btnCatAdd">Загрузить выгрузку товаров</button>
+              <button class="btn danger" type="button" id="btnCatClear">Убрать справочник</button>
+            </div>
+            <p class="hint-s" id="aliasText"></p>
+            <div class="set-actions"><button class="btn" type="button" id="btnAliasClear">Забыть запомненные штрихкоды</button></div>
           </div>
           <div class="tabpanel" id="panelArc" role="tabpanel" hidden>
             <p id="archiveText"></p>
@@ -510,6 +550,7 @@ button,input{font:inherit;color:inherit}
 
 <input type="file" id="fileInput" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
 <input type="file" id="archiveInput" accept=".xlsx" multiple hidden>
+<input type="file" id="catInput" accept=".xlsx" hidden>
 <div class="dropper" id="dropper" hidden><div><svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M5 20h14"/></svg>Отпустите файл, чтобы загрузить шаблон</div></div>
 <div class="toast" id="toast" role="status" hidden><span id="toastText"></span><button class="toast-act" type="button" id="toastAct" hidden></button></div>
 
@@ -531,7 +572,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
   del(k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } }
 };
-const SKEY = 'qrbind:sessions:v1', HKEY = 'qrbind:history:v1', OKEY = 'qrbind:opts:v1';
+const SKEY = 'qrbind:sessions:v1', HKEY = 'qrbind:history:v1', OKEY = 'qrbind:opts:v1', ALKEY = 'qrbind:aliases:v1', CKEY = 'qrbind:catalog:v1';
 const ICON = {
   check: '<path d="M20 6 9 17l-5-5"/>',
   x: '<path d="M18 6 6 18M6 6l12 12"/>',
@@ -842,22 +883,30 @@ let groups = new Map();
 let order = [];
 let cargos = [];
 let bcIndex = new Map();
+let artIndex = new Map();
 let qrIndex = new Map();
-let cur = { cargo: null, key: null, explicit: false };
+let cur = { cargo: null, key: null, explicit: false, prev: null };
 let undoStack = [];
 let loadIssues = [];
 let logItems = [];
 let lastQr = null;
 let pendingResume = null;
 let pendingConfirm = null;
+let pendingQr = null;      // QR that waits for a confirming second scan: {code, key, at}
+let pickAlias = null;      // unknown barcode that waits for the user to pick its product
+let verify = { on: false, qr: null, key: null, shown: null };
+let verified = new Set();
+let lastActionAt = Date.now();
 let expanded = new Set();
 let filter = 'all';
 let query = '';
 let history = store.get(HKEY, {}) || {};
-const opts = Object.assign({ strict: false, sound: true, volume: 80 }, store.get(OKEY, {}) || {});
+let aliases = store.get(ALKEY, {}) || {};
+let catalog = store.get(CKEY, null);
+const opts = Object.assign({ strict: false, sound: true, volume: 80, batchCheck: true, pauseMin: 3 }, store.get(OKEY, {}) || {});
 
 function buildGroups() {
-  groups = new Map(); order = []; bcIndex = new Map();
+  groups = new Map(); order = []; bcIndex = new Map(); artIndex = new Map();
   rows.forEach((row, i) => {
     const key = row.cargo + '|' + (row.barcode || ('#' + row.article));
     row.key = key;
@@ -867,10 +916,13 @@ function buildGroups() {
   });
   cargos = Array.from(new Set(rows.map((r) => r.cargo)));
   for (const g of groups.values()) {
-    if (!g.barcode) continue;
-    const k = g.barcode.toUpperCase();
-    if (!bcIndex.has(k)) bcIndex.set(k, []);
-    bcIndex.get(k).push(g.key);
+    if (g.barcode) {
+      const k = g.barcode.toUpperCase();
+      if (!bcIndex.has(k)) bcIndex.set(k, []);
+      bcIndex.get(k).push(g.key);
+    }
+    const a = normalize(g.article).value.toUpperCase();
+    if (a) { if (!artIndex.has(a)) artIndex.set(a, []); artIndex.get(a).push(g.key); }
   }
 }
 function recount() {
@@ -882,6 +934,28 @@ const totals = () => { let need = 0, done = 0; for (const g of groups.values()) 
 const supplyNo = (name) => { const m = String(name || '').match(/(\d{8,})(?!.*\d{8,})/); return m ? m[1] : null; };
 function historyConflict(code) { const h = history[code]; return h && book && h[0] !== book.name ? h : null; }
 function changed() { if (book) book.exportedAt = null; }
+const freeSlot = (g) => g.idx.find((i) => !rows[i].qr);
+
+/* label numbers: QR labels come off the roll in order, so each product's codes sit close together */
+const qrNum = (code) => Number(code.slice(2));
+function groupRange(g) {
+  let min = Infinity, max = -Infinity, n = 0;
+  for (const i of g.idx) { const q = rows[i].qr; if (!q) continue; const v = qrNum(q); if (v < min) min = v; if (v > max) max = v; n++; }
+  return n ? { min: min, max: max, n: n } : null;
+}
+function batchOwner(num, exceptKey) {
+  for (const g of groups.values()) {
+    if (g.key === exceptKey) continue;
+    const r = groupRange(g);
+    if (r && r.n >= 2 && num > r.min && num < r.max) return g;
+  }
+  return null;
+}
+function nearestOwn(num, g) {
+  let best = Infinity;
+  for (const i of g.idx) { const q = rows[i].qr; if (q) best = Math.min(best, Math.abs(qrNum(q) - num)); }
+  return best;
+}
 
 function openBook(b, o) {
   o = o || {};
@@ -889,6 +963,7 @@ function openBook(b, o) {
   rows = b.rows.map((x) => Object.assign({}, x, { qr: null }));
   loadIssues = (b.warnings || []).slice();
   buildGroups();
+  infoCache.clear();
   const src = o.codes && o.codes.length === rows.length ? o.codes : null;
   const seen = new Map();
   let fixed = 0;
@@ -908,12 +983,125 @@ function openBook(b, o) {
   if (fixed) loadIssues.push({ lvl: 'info', text: 'Исправлено автоматически: ' + fixed + ' ' + plural(fixed, 'код', 'кода', 'кодов') + ' (пробелы, регистр, русская раскладка).' });
   recount();
   undoStack = (o.undo || []).filter((u) => rows[u.i] && rows[u.i].qr === u.code);
-  cur = { cargo: cargos.length === 1 ? cargos[0] : null, key: null, explicit: false };
-  lastQr = null; expanded = new Set(); logItems = []; filter = 'all'; query = ''; $('search').value = '';
+  verified = new Set((o.verified || []).filter((c) => qrIndex.has(c)));
+  cur = { cargo: cargos.length === 1 ? cargos[0] : null, key: null, explicit: false, prev: null };
+  lastQr = null; pendingQr = null; pickAlias = null; verify = { on: false, qr: null, key: null, shown: null };
+  lastActionAt = Date.now();
+  expanded = new Set(); logItems = []; filter = 'all'; query = ''; $('search').value = '';
   pendingResume = null; $('resumeBanner').hidden = true; $('confirmBanner').hidden = true;
   $('demoNote').hidden = !book.demo;
   $('tryBox').hidden = !book.demo;
   showScreen('work');
+}
+
+/* ---------- what the product is: colour, size, gender from the article or the product list ---------- */
+const COLOR_DICT = [
+  [['white', 'белы', 'бела', 'белое'], 'Белый', '#F7F7F4'],
+  [['milk', 'молоч'], 'Молочный', '#F2EBDD'],
+  [['cream', 'кремов'], 'Кремовый', '#F0E2C2'],
+  [['ivory', 'айвори'], 'Айвори', '#F3ECD9'],
+  [['bez', 'beige', 'беж'], 'Бежевый', '#D8C29F'],
+  [['sand', 'песоч'], 'Песочный', '#D4BC91'],
+  [['capuch', 'cappuc', 'капуч'], 'Капучино', '#A8805F'],
+  [['mocha', 'мокк'], 'Мокко', '#7B5642'],
+  [['caramel', 'карамел'], 'Карамельный', '#B6763F'],
+  [['choco', 'шокол'], 'Шоколадный', '#5A3A2A'],
+  [['brown', 'корич'], 'Коричневый', '#6D4631'],
+  [['bord', 'burgund', 'бордо', 'бордов'], 'Бордовый', '#7B1F2C'],
+  [['wine', 'винн'], 'Винный', '#6F1E2F'],
+  [['red', 'красн'], 'Красный', '#C62D2D'],
+  [['pink', 'розов'], 'Розовый', '#E89BB1'],
+  [['pudra', 'powder', 'пудр'], 'Пудровый', '#E5C3BD'],
+  [['lilac', 'сирен'], 'Сиреневый', '#B89DCB'],
+  [['lavend', 'лаванд'], 'Лавандовый', '#B9A8D9'],
+  [['purple', 'violet', 'фиолет'], 'Фиолетовый', '#6F3F96'],
+  [['navy'], 'Тёмно-синий', '#1F2B4D'],
+  [['blue', 'синий', 'сини'], 'Синий', '#2E5EA9'],
+  [['sky', 'голуб'], 'Голубой', '#8DC0E5'],
+  [['mint', 'мятн'], 'Мятный', '#A5DBC5'],
+  [['green', 'зелен', 'зелён'], 'Зелёный', '#2F7D4B'],
+  [['olive', 'олив'], 'Оливковый', '#6C6C3B'],
+  [['khaki', 'хаки'], 'Хаки', '#8B8557'],
+  [['yellow', 'желт', 'жёлт'], 'Жёлтый', '#E8C548'],
+  [['mustard', 'горчич'], 'Горчичный', '#C9A228'],
+  [['orange', 'оранж'], 'Оранжевый', '#E07C3A'],
+  [['terra', 'терракот'], 'Терракотовый', '#B85D3D'],
+  [['grey', 'gray', 'серы', 'серая', 'серое'], 'Серый', '#8E9297'],
+  [['graphite', 'графит'], 'Графитовый', '#3F4348'],
+  [['black', 'черн', 'чёрн'], 'Чёрный', '#1D1D1F']
+];
+const cap = (s) => { s = String(s || '').trim(); return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; };
+function colorsInTokens(tokens) {
+  const found = [];
+  for (const t of tokens) {
+    let best = null, bestLen = 0;
+    for (const [stems, name, hex] of COLOR_DICT) {
+      for (const s of stems) {
+        const hit = /[а-яё]/.test(s) ? t.indexOf(s) === 0 : (t === s || t.startsWith(s) || t.endsWith(s));
+        if (hit && s.length > bestLen) { best = { name: name, hex: hex }; bestLen = s.length; }
+      }
+    }
+    if (best && !found.some((f) => f.name === best.name)) found.push(best);
+  }
+  return found.slice(0, 2);
+}
+const letterTokens = (s) => String(s || '').toLowerCase().split(/[^a-zа-яё0-9]+/).map((t) => t.replace(/\d+/g, '')).filter(Boolean);
+function parseArticle(article) {
+  const a = String(article || '');
+  const low = a.toLowerCase();
+  const tokens = low.split(/[^a-zа-яё0-9]+/).filter(Boolean);
+  const letters = letterTokens(a);
+  let gender = null;
+  for (const t of letters) {
+    if (/^(woman|women|wom|female|lady|ladies)$/.test(t) || /^жен/.test(t)) { gender = 'Женская'; break; }
+    if (/^(man|men|male)$/.test(t) || /^муж/.test(t)) { gender = 'Мужская'; break; }
+    if (/^(kid|kids|child|children|boy|girl|baby)$/.test(t) || /^дет/.test(t)) { gender = 'Детская'; break; }
+    if (/^(unisex|унисекс)$/.test(t)) { gender = 'Унисекс'; break; }
+  }
+  let words = '';
+  if (/one\s*size/i.test(a)) words = 'ONE SIZE';
+  else if (/plus\s*size/i.test(a)) words = 'Plus size';
+  else if (/oversize/i.test(a)) words = 'Oversize';
+  let main = '';
+  const re = /(\d{2,3})\s*[-–\/_]\s*(\d{2,3})/g;
+  let m;
+  while ((m = re.exec(a))) { const x = +m[1], y = +m[2]; if (x >= 18 && y <= 80 && x < y) main = x + '–' + y; }
+  if (!main) { const s = /[_\-\s\/](\d{2})\s*$/.exec(a); if (s && +s[1] >= 36 && +s[1] <= 70) main = s[1]; }
+  if (!main) { const L = tokens.find((t) => /^(xxs|xs|s|m|l|xl|xxl|xxxl|[2-6]xl)$/.test(t)); if (L) main = L.toUpperCase(); }
+  const size = (main || words) ? { main: main || words, words: main ? words : '' } : null;
+  const family = (low.split(/[\/\-_\s(]+/)[0] || '').trim();
+  return { colors: colorsInTokens(letters), gender: gender, size: size, family: family };
+}
+function catalogFind(barcode, article) {
+  if (!catalog || !catalog.items) return null;
+  let i = barcode ? catalog.byBc[String(barcode).toUpperCase()] : undefined;
+  if (i === undefined && article) i = catalog.byArt[String(article).trim().toLowerCase()];
+  return i === undefined ? null : catalog.items[i];
+}
+const infoCache = new Map();
+function productInfo(g) {
+  const k = g.barcode + '|' + g.article;
+  if (infoCache.has(k)) return infoCache.get(k);
+  const p = parseArticle(g.article);
+  const c = catalogFind(g.barcode, g.article);
+  let colors = p.colors, size = p.size;
+  if (c && c.c) { const f = colorsInTokens(letterTokens(c.c)); colors = [{ name: cap(c.c), hex: f.length ? f[0].hex : null }]; }
+  if (c && c.s) size = { main: c.s, words: p.size && p.size.words && p.size.words !== c.s ? p.size.words : '' };
+  const info = { name: c && c.n ? c.n : '', colors: colors, gender: p.gender, size: size, photo: c && c.p ? c.p : '', family: p.family };
+  infoCache.set(k, info);
+  return info;
+}
+function describe(info) {
+  const parts = [];
+  if (info.colors.length) parts.push(info.colors.map((c) => c.name.toLowerCase()).join('/'));
+  if (info.size) parts.push('размер ' + info.size.main + (info.size.words ? ' (' + info.size.words + ')' : ''));
+  if (info.gender) parts.push(info.gender.toLowerCase());
+  return cap(parts.join(', '));
+}
+const colorKey = (i) => i.colors.map((c) => c.name).join('/');
+const sizeKey = (i) => (i.size ? i.size.main + '|' + i.size.words : '');
+function sharesSome(a, b) {
+  return !!((a.family && a.family === b.family) || (colorKey(a) && colorKey(a) === colorKey(b)) || (sizeKey(a) && sizeKey(a) === sizeKey(b)));
 }
 
 /* ---------- feedback, sound, log ---------- */
@@ -953,15 +1141,17 @@ function note(freq, at, dur, o) {
 }
 const BUZZ = { type: 'square', gain: 0.13, lowpass: 1500, hold: 0.6, attack: 0.02 };
 const SND = {
-  /* QR привязан: тот же чистый звон, две ноты вверх */
+  /* QR привязан: чистый звон, две ноты вверх */
   ok: () => { note(1319, 0, 0.16, { gain: 0.2 }); note(1760, 0.11, 0.26, { gain: 0.18 }); },
-  /* товар или коробка отсканированы: короткий мягкий сигнал */
+  /* коробка выбрана: короткий мягкий сигнал */
   info: () => note(880, 0, 0.12, { gain: 0.1 }),
-  /* уже был, повтор пропущен: нейтральное «тук-тук» */
+  /* товар выбран или сменён: две ноты пониже, чем у привязки */
+  product: () => { note(784, 0, 0.1, { gain: 0.15 }); note(1175, 0.09, 0.18, { gain: 0.15 }); },
+  /* уже был, повтор пропущен, нужно подтвердить: нейтральное «тук-тук» */
   warn: () => { note(660, 0, 0.1, { type: 'triangle', gain: 0.24 }); note(660, 0.16, 0.1, { type: 'triangle', gain: 0.24 }); },
   /* ошибка: низкий нисходящий двойной гудок, почти секунда */
   err: () => { note(440, 0, 0.3, Object.assign({ glide: 0.94 }, BUZZ)); note(330, 0.34, 0.5, Object.assign({ glide: 0.9 }, BUZZ)); },
-  /* товар готов: три ноты вверх */
+  /* товар собран: три ноты вверх */
   group: () => { note(1047, 0, 0.16, { gain: 0.18 }); note(1319, 0.12, 0.16, { gain: 0.18 }); note(1568, 0.24, 0.32, { gain: 0.18 }); },
   /* вся поставка готова: четыре ноты вверх */
   all: () => { note(1047, 0, 0.16, { gain: 0.18 }); note(1319, 0.13, 0.16, { gain: 0.18 }); note(1568, 0.26, 0.16, { gain: 0.18 }); note(2093, 0.39, 0.6, { gain: 0.16, hold: 0.2 }); },
@@ -969,14 +1159,19 @@ const SND = {
 };
 const RES_ICON = { ok: 'check', warn: 'alert', err: 'x', info: 'info' };
 let flashTimer = null;
-function setResult(lvl, title, detail) {
+let resActs = [];
+function setResult(lvl, title, detail, actions) {
   $('result').className = 'result ' + lvl;
   $('resIc').innerHTML = svg(RES_ICON[lvl] || 'info');
   $('resT').textContent = title;
   $('resD').textContent = detail || '';
+  resActs = actions || [];
+  const box = $('resActs');
+  box.hidden = !resActs.length;
+  box.innerHTML = resActs.map((a, i) => '<button class="btn sm' + (a.primary ? ' primary' : '') + '" type="button" data-ra="' + i + '">' + esc(a.label) + '</button>').join('');
 }
-function feedback(lvl, title, detail, sound) {
-  setResult(lvl, title, detail);
+function feedback(lvl, title, detail, sound, actions) {
+  setResult(lvl, title, detail, actions);
   const label = $('label');
   label.classList.remove('f-ok', 'f-err', 'f-warn');
   if (lvl === 'ok' || lvl === 'err' || lvl === 'warn') {
@@ -1015,28 +1210,65 @@ function matchProduct(v) {
   const tries = [up];
   if (/^0\d{13}$/.test(up)) tries.push(up.slice(1));
   if (/^\d{12}$/.test(up)) tries.push('0' + up);
+  const gs1 = /^(?:\(01\)|01)(\d{14})/.exec(up);         /* DataMatrix «Честного знака»: 01 + GTIN */
+  if (gs1) { tries.push(gs1[1]); if (gs1[1].charAt(0) === '0') tries.push(gs1[1].slice(1)); }
   for (const t of tries) if (bcIndex.has(t)) return bcIndex.get(t);
-  return [];
+  const al = aliases[up];
+  if (al) {
+    if (al.b && bcIndex.has(String(al.b).toUpperCase())) return bcIndex.get(String(al.b).toUpperCase());
+    const ak = al.a ? artIndex.get(normalize(al.a).value.toUpperCase()) : null;
+    if (ak) return ak;
+  }
+  return artIndex.get(up) || [];
 }
 function onScan(raw) {
   if (!book) return;
   const n = normalize(raw), v = n.value;
   if (!v) return;
+  const idle = Date.now() - lastActionAt;
+  lastActionAt = Date.now();
   if (pendingResume) { pendingResume = null; $('resumeBanner').hidden = true; }
-  const code = asQr(v);
-  if (code) onQr(code, n.layout);
+  if (verify.on) verifyScan(v);
   else {
-    const cg = matchCargo(v);
-    if (cg) onCargo(cg);
+    const code = asQr(v);
+    if (code) onQr(code, n.layout, idle);
     else {
-      const keys = matchProduct(v);
-      if (keys.length) onProduct(keys);
-      else if (/^ii/i.test(v)) feedback('err', 'QR считался не полностью', '«' + v + '» короче обычного: код экземпляра — это ii и 11 цифр. Отсканируйте этикетку ещё раз.');
-      else feedback('err', 'Этого кода нет в поставке', '«' + v + '» — не QR экземпляра и не товар или коробка из загруженного шаблона.');
+      const cg = matchCargo(v);
+      if (cg) onCargo(cg);
+      else {
+        const keys = matchProduct(v);
+        if (keys.length) { if (pickAlias) pickAlias = null; onProduct(keys); }
+        else unknownCode(v);
+      }
     }
   }
   saveSession();
   render();
+}
+function unknownCode(v) {
+  if (/^ii/i.test(v)) { feedback('err', 'QR считался не полностью', '«' + v + '» короче обычного: код экземпляра — это ii и 11 цифр. Отсканируйте этикетку ещё раз.'); return; }
+  feedback('err', 'Этого кода нет в поставке', '«' + v + '» — не QR экземпляра и не товар или коробка из шаблона. Если это другой штрихкод вашего товара, его можно запомнить.', 'err',
+    [{ label: 'Это штрихкод товара…', fn: () => startPick(v) }]);
+}
+function startPick(code) {
+  pickAlias = code.toUpperCase();
+  setResult('info', 'Выберите товар для штрихкода ' + code, 'Нажмите на нужный товар в списке ниже. Потом этот штрихкод будет сразу его выбирать.', [{ label: 'Отмена', fn: cancelPick }]);
+  render();
+  const list = document.querySelector('.list');
+  if (list && list.scrollIntoView) list.scrollIntoView({ block: 'start' });
+}
+function cancelPick() { pickAlias = null; setResult('info', 'Штрихкод не запомнен', 'Отсканируйте товар или выберите его в списке.'); render(); }
+function saveAlias(code, key) {
+  const g = groups.get(key);
+  if (!g) return;
+  aliases[code] = { b: g.barcode, a: g.article };
+  store.set(ALKEY, aliases);
+  pickAlias = null;
+  if (cur.key && cur.key !== key) cur.prev = cur.key;
+  cur.key = key; cur.cargo = g.cargo; pendingQr = null;
+  lastActionAt = Date.now();
+  feedback('ok', 'Запомнил штрихкод', code + ' теперь выбирает «' + g.article + '». Сканируйте QR-коды его экземпляров.', 'product');
+  saveSession(); render();
 }
 function onCargo(c) {
   cur.cargo = c; cur.explicit = true; cur.explicitByClick = false;
@@ -1062,46 +1294,77 @@ function onProduct(keys) {
     return;
   }
   const g = groups.get(key);
-  cur.key = key; cur.cargo = g.cargo;
+  const was = cur.key ? groups.get(cur.key) : null;
+  const switched = was && was.key !== key;
+  if (switched) cur.prev = was.key;
+  cur.key = key; cur.cargo = g.cargo; pendingQr = null;
   const left = g.need - g.done;
-  if (left <= 0) feedback('warn', 'У «' + g.article + '» уже все ' + g.need + ' с QR', 'Если это лишний экземпляр, отложите его: в заявке его нет.');
-  else feedback('info', 'Товар: ' + g.article, 'Сканируйте QR-коды экземпляров, осталось ' + left + ' из ' + g.need + '.');
+  const d = describe(productInfo(g));
+  if (left <= 0) { feedback('warn', 'У «' + g.article + '» уже все ' + g.need + ' с QR', 'Если это лишний экземпляр, отложите его: в заявке его нет.'); return; }
+  if (switched && was.done > 0 && was.done < was.need) {
+    feedback('warn', 'Переключились на ' + g.article, '«' + was.article + '» не закончен: ' + was.done + ' из ' + was.need + '. ' + (d ? d + '. ' : '') + 'Осталось ' + left + ' из ' + g.need + '.', 'product');
+    return;
+  }
+  feedback('info', (switched ? 'Переключились на ' : 'Товар: ') + g.article, (d ? d + '. ' : '') + 'Сканируйте QR-коды экземпляров, осталось ' + left + ' из ' + g.need + '.', 'product');
 }
-function onQr(code, layoutFixed) {
+function onQr(code, layoutFixed, idle) {
   const at = qrIndex.get(code);
   if (at !== undefined) {
     const r = rows[at], g = groups.get(r.key);
-    if (cur.key === r.key || lastQr === code) feedback('warn', 'Этот QR уже привязан', code + ' уже стоит у этого товара (строка ' + r.r + '). Повтор пропущен.');
+    if (cur.key === r.key || cur.prev === r.key || lastQr === code) feedback('warn', 'Этот QR уже привязан', code + ' уже стоит у «' + g.article + '» (строка ' + r.r + '). Повтор пропущен.');
     else feedback('err', 'QR уже стоит у другого товара', code + ' привязан к «' + g.article + '» (строка ' + r.r + '). Одна этикетка — один экземпляр: проверьте, не перепутаны ли товары.');
     return;
   }
   const h = historyConflict(code);
   if (h) { feedback('err', 'QR уже был в другой поставке', code + ' использован в файле «' + h[0] + '» (' + fmtDate(h[2]) + ', ' + h[1] + '). Возьмите новую этикетку.'); return; }
+  if (cur.key && opts.pauseMin && idle > opts.pauseMin * 60000) {
+    const g0 = groups.get(cur.key);
+    cur.prev = cur.key; cur.key = null; pendingQr = null;
+    feedback('err', 'Была пауза: отсканируйте товар заново', 'С последнего скана прошло больше ' + opts.pauseMin + ' мин. Чтобы не привязать QR не к тому товару, отсканируйте штрихкод изделия ещё раз. До паузы был выбран «' + g0.article + '».');
+    return;
+  }
   if (!cur.key) {
-    feedback('err', 'Сначала отсканируйте товар', cargos.length > 1 && !cur.explicit ? 'Порядок: коробка, товар, затем QR-коды его экземпляров.' : 'Порядок: штрихкод товара, затем QR-коды его экземпляров.');
+    const p = cur.prev ? groups.get(cur.prev) : null;
+    if (p && p.done === p.need) feedback('err', '«' + p.article + '» уже собран', 'Все ' + p.need + ' из ' + p.need + ' с QR. Если это ещё один экземпляр этого товара, он лишний. Если другой товар — сначала отсканируйте его штрихкод.');
+    else feedback('err', 'Сначала отсканируйте товар', cargos.length > 1 && !cur.explicit ? 'Порядок: коробка, товар, затем QR-коды его экземпляров.' : 'Порядок: штрихкод товара, затем QR-коды его экземпляров.');
     return;
   }
   const g = groups.get(cur.key);
-  const free = g.idx.find((i) => !rows[i].qr);
+  const free = freeSlot(g);
   if (free === undefined) { feedback('err', 'У «' + g.article + '» уже все ' + g.need + ' с QR', 'Лишний экземпляр или другой товар: отсканируйте его штрихкод.'); return; }
+  const num = qrNum(code);
+  let confirmed = false, far = false;
+  if (opts.batchCheck) {
+    const other = batchOwner(num, g.key);
+    confirmed = !!(pendingQr && pendingQr.code === code && pendingQr.key === g.key && Date.now() - pendingQr.at < 120000);
+    if (other && !confirmed) {
+      pendingQr = { code: code, key: g.key, at: Date.now() };
+      feedback('warn', 'Похоже на этикетку из пачки «' + other.article + '»', 'Номер ' + code + ' попадает между этикетками того товара. Проверьте изделие. Если всё верно, отсканируйте этот же QR ещё раз — привяжу к «' + g.article + '».');
+      return;
+    }
+    const own = groupRange(g);
+    far = !confirmed && !!own && own.n >= 3 && nearestOwn(num, g) > Math.max(30, g.need * 2);
+  }
+  pendingQr = null;
   rows[free].qr = code; qrIndex.set(code, free); g.done++;
   undoStack.push({ i: free, code: code });
   if (undoStack.length > 500) undoStack.shift();
   lastQr = code; changed();
   const t = totals();
-  const fix = layoutFixed ? ' Раскладку исправил автоматически.' : '';
-  if (t.done === t.need) feedback('ok', 'Все ' + fmtN(t.need) + ' экземпляров привязаны', 'Скачайте файл и загрузите его в заявку.' + fix, 'all');
-  else if (g.done === g.need) feedback('ok', g.article + ' готов', 'Все ' + g.need + ' из ' + g.need + '. Переходите к следующему товару.' + fix, 'group');
-  else feedback('ok', 'Привязан ' + code, g.article + ': ' + g.done + ' из ' + g.need + '.' + fix);
-  if (opts.strict) cur.key = null;
+  const extra = (layoutFixed ? ' Раскладку исправил автоматически.' : '') + (confirmed ? ' Подтверждено повторным сканом.' : '') + (far ? ' Номер далеко от остальных этикеток этого товара — проверьте изделие.' : '');
+  if (t.done === t.need) { feedback('ok', 'Все ' + fmtN(t.need) + ' экземпляров привязаны', 'Скачайте файл и загрузите его в заявку.' + extra, 'all'); cur.prev = g.key; cur.key = null; return; }
+  if (g.done === g.need) { feedback('ok', g.article + ' готов', 'Все ' + g.need + ' из ' + g.need + '. Отсканируйте штрихкод следующего товара.' + extra, 'group'); cur.prev = g.key; cur.key = null; return; }
+  feedback(far ? 'warn' : 'ok', 'Привязан ' + code, g.article + ': ' + g.done + ' из ' + g.need + '.' + extra, 'ok');
+  if (opts.strict) { cur.prev = cur.key; cur.key = null; }
 }
 function undo() {
   const u = undoStack.pop();
   if (!u) { feedback('warn', 'Отменять нечего', 'В этой сессии ещё ничего не привязано.'); render(); return; }
   const row = rows[u.i];
   if (row && row.qr === u.code) {
-    row.qr = null; recount(); changed();
-    cur.key = row.key; cur.cargo = row.cargo;
+    row.qr = null; recount(); changed(); verified.delete(u.code);
+    if (cur.key && cur.key !== row.key) cur.prev = cur.key;
+    cur.key = row.key; cur.cargo = row.cargo; lastActionAt = Date.now();
     feedback('warn', 'Отменено: ' + u.code, '«' + row.article + '», строка ' + row.r + '. Этот код можно отсканировать снова.');
   }
   saveSession(); render();
@@ -1112,6 +1375,7 @@ function removeCode(i) {
   const code = row.qr;
   row.qr = null;
   undoStack = undoStack.filter((u) => u.i !== i);
+  verified.delete(code);
   recount(); changed();
   feedback('warn', 'Убран ' + code, '«' + row.article + '», строка ' + row.r + '.');
   saveSession(); render();
@@ -1120,19 +1384,93 @@ function selectGroup(key) {
   const g = groups.get(key);
   if (!g) return;
   if (cur.key === key) { unselect(); return; }
-  cur.key = key; cur.cargo = g.cargo;
+  if (cur.key) cur.prev = cur.key;
+  cur.key = key; cur.cargo = g.cargo; pendingQr = null; lastActionAt = Date.now();
   if (cargos.length > 1 && !cur.explicit) { cur.explicit = true; cur.explicitByClick = true; }
   const left = g.need - g.done;
-  feedback('info', 'Товар: ' + g.article, (left > 0 ? 'Выбран вручную, осталось ' + left + ' из ' + g.need + '.' : 'Выбран вручную, все ' + g.need + ' уже с QR.') + ' Чтобы отменить, нажмите на него ещё раз или «Снять выбор».');
+  const d = describe(productInfo(g));
+  feedback('info', 'Товар: ' + g.article, (d ? d + '. ' : '') + (left > 0 ? 'Выбран вручную, осталось ' + left + ' из ' + g.need + '.' : 'Выбран вручную, все ' + g.need + ' уже с QR.') + ' Чтобы отменить, нажмите на него ещё раз или «Снять выбор».', 'product');
   render();
 }
 function unselect() {
   if (!cur.key) return;
   const g = groups.get(cur.key);
-  cur.key = null;
+  cur.prev = cur.key; cur.key = null; pendingQr = null;
   if (cur.explicitByClick) { cur.explicit = false; cur.explicitByClick = false; }
   feedback('info', 'Выбор снят', (g ? '«' + g.article + '» больше не выбран. ' : '') + 'Отсканируйте товар или выберите его в списке.', 'none');
   render();
+}
+
+/* ---------- verification: scan the QR and the barcode of the same item, compare with the file ---------- */
+function setVerify(on) {
+  verify = { on: on, qr: null, key: null, shown: null };
+  pickAlias = null; pendingQr = null;
+  if (on) setResult('info', 'Режим проверки', 'Отсканируйте QR на изделии: покажу, к какому товару он привязан. Затем штрихкод этого изделия, и я сверю пару.');
+  else setResult('info', 'Проверка выключена', 'Можно продолжать привязку.');
+  logEvt('info', on ? 'Включён режим проверки.' : 'Режим проверки выключен.');
+  render();
+}
+function verifyScan(v) {
+  const code = asQr(v);
+  if (code) { verifyQr(code); return; }
+  if (matchCargo(v)) { feedback('info', 'Это штрихкод коробки', 'В режиме проверки коробки сканировать не нужно.'); return; }
+  const keys = matchProduct(v);
+  if (keys.length) { verifyProduct(keys); return; }
+  feedback('err', 'Этого кода нет в поставке', '«' + v + '» — не QR и не штрихкод товара из шаблона.');
+}
+function verifyQr(code) {
+  const at = qrIndex.get(code);
+  const pend = verify.key ? groups.get(verify.key) : null;
+  if (at === undefined) {
+    verify.qr = null; verify.key = null; verify.shown = pend ? pend.key : null;
+    const can = pend && freeSlot(pend) !== undefined;
+    feedback('err', 'Этот QR ни к чему не привязан', code + ' нет в файле.' + (pend ? (can ? ' Можно привязать его к «' + pend.article + '».' : ' У «' + pend.article + '» нет свободных мест.') : ''), 'err',
+      can ? [{ label: 'Привязать к «' + pend.article + '»', primary: true, fn: () => bindTo(code, pend.key) }] : []);
+    return;
+  }
+  const row = rows[at];
+  if (pend) { verify.key = null; compareBinding(code, row, pend.key); return; }
+  verify.qr = code; verify.shown = row.key;
+  const g = groups.get(row.key), d = describe(productInfo(g));
+  feedback('info', 'QR привязан к ' + g.article, (d ? d + '. ' : '') + 'Сверьте с изделием или отсканируйте его штрихкод.', 'product');
+}
+function verifyProduct(keys) {
+  const qrRow = verify.qr ? rows[qrIndex.get(verify.qr)] : null;
+  const key = qrRow && keys.indexOf(qrRow.key) >= 0 ? qrRow.key : keys[0];
+  if (qrRow) { const code = verify.qr; verify.qr = null; compareBinding(code, qrRow, key); return; }
+  verify.key = key; verify.shown = key;
+  const g = groups.get(key), d = describe(productInfo(g));
+  feedback('info', 'Товар: ' + g.article, (d ? d + '. ' : '') + 'Теперь отсканируйте QR на этом же изделии.', 'product');
+}
+function compareBinding(code, row, key) {
+  verify.shown = key;
+  if (row.key === key) {
+    verified.add(code);
+    feedback('ok', 'Совпадает', code + ' привязан к «' + groups.get(key).article + '». Проверено ' + verified.size + ' из ' + totals().done + '.');
+    return;
+  }
+  const gy = groups.get(row.key), gx = groups.get(key);
+  const can = freeSlot(gx) !== undefined;
+  feedback('err', 'Не совпадает', code + ' привязан к «' + gy.article + '», а изделие — «' + gx.article + '».' + (can ? '' : ' У «' + gx.article + '» нет свободных мест: сначала уберите лишний код в списке товаров.'), 'err',
+    can ? [{ label: 'Перепривязать к «' + gx.article + '»', primary: true, fn: () => rebind(code, key) }] : []);
+}
+function rebind(code, key) {
+  const at = qrIndex.get(code), g = groups.get(key), free = freeSlot(g);
+  if (at === undefined || free === undefined) return;
+  const from = groups.get(rows[at].key);
+  rows[at].qr = null; rows[free].qr = code;
+  undoStack = undoStack.filter((u) => u.i !== at);
+  recount(); changed(); verified.add(code);
+  feedback('ok', 'Перепривязан ' + code, 'Был у «' + from.article + '», теперь у «' + g.article + '».');
+  saveSession(); render();
+}
+function bindTo(code, key) {
+  const g = groups.get(key), free = freeSlot(g);
+  if (free === undefined || qrIndex.has(code)) return;
+  rows[free].qr = code; recount(); changed(); verified.add(code);
+  undoStack.push({ i: free, code: code });
+  feedback('ok', 'Привязан ' + code, '«' + g.article + '»: ' + g.done + ' из ' + g.need + '.');
+  saveSession(); render();
 }
 
 /* ---------- persistence ---------- */
@@ -1145,7 +1483,7 @@ function saveSession() {
   saveTimer = setTimeout(() => {
     const sessions = store.get(SKEY, {}) || {};
     const t = totals();
-    sessions[book.name] = { name: book.name, b64: book.b64, codes: rows.map((r) => r.qr || ''), undo: undoStack.slice(-200), savedAt: Date.now(), done: t.done, need: t.need, rowsCount: rows.length, exportedAt: book.exportedAt || null };
+    sessions[book.name] = { name: book.name, b64: book.b64, codes: rows.map((r) => r.qr || ''), undo: undoStack.slice(-200), savedAt: Date.now(), done: t.done, need: t.need, rowsCount: rows.length, exportedAt: book.exportedAt || null, verified: Array.from(verified) };
     const names = Object.keys(sessions).sort((a, b) => sessions[b].savedAt - sessions[a].savedAt);
     for (const n of names.slice(8)) delete sessions[n];
     store.set(SKEY, sessions);
@@ -1190,7 +1528,7 @@ async function resumeSaved(name) {
   try {
     const buf = fromB64(s.b64);
     const parsed = await parseTemplate(buf);
-    openBook(Object.assign({ name: s.name, buffer: buf, b64: s.b64, demo: false, exportedAt: s.exportedAt || null }, parsed), { codes: s.codes, undo: s.undo });
+    openBook(Object.assign({ name: s.name, buffer: buf, b64: s.b64, demo: false, exportedAt: s.exportedAt || null }, parsed), { codes: s.codes, undo: s.undo, verified: s.verified });
     const t = totals();
     setResult('info', 'Продолжаем: ' + t.done + ' из ' + t.need, 'Восстановлено сканирование от ' + fmtDate(s.savedAt) + '.');
     logEvt('info', 'Восстановлено сканирование от ' + fmtDate(s.savedAt) + '.');
@@ -1225,6 +1563,96 @@ async function addArchive(files) {
   }
   store.set(HKEY, history);
   toast('Добавлено ' + fmtN(added) + ' ' + plural(added, 'код', 'кода', 'кодов') + ' из ' + n + ' ' + plural(n, 'файла', 'файлов', 'файлов') + (failed.length ? '. Не прочитаны: ' + failed.join(', ') : '.'));
+  render();
+}
+
+/* ---------- product list from the seller account: name, colour, size, photo ---------- */
+async function readGrids(buf) {
+  if (!window.JSZip) throw new Error('Не загрузилась библиотека для чтения Excel. Проверьте интернет и обновите страницу.');
+  let zip;
+  try { zip = await window.JSZip.loadAsync(buf); } catch (e) { throw new Error('Это не файл Excel (.xlsx).'); }
+  const readText = async (p) => { const f = p ? zip.file(p) : null; return f ? f.async('string') : null; };
+  let wbPath = 'xl/workbook.xml';
+  const rootRels = await readText('_rels/.rels');
+  if (rootRels) for (const r of all(parseXml(rootRels), 'Relationship')) if (/\/officeDocument$/.test(r.getAttribute('Type') || '')) { wbPath = resolvePath('', r.getAttribute('Target')); break; }
+  const wbText = await readText(wbPath);
+  if (!wbText) throw new Error('В файле нет книги Excel.');
+  const relsText = await readText(wbPath.replace(/[^/]+$/, (m) => '_rels/' + m + '.rels'));
+  const rels = new Map();
+  let sstPath = null;
+  if (relsText) for (const r of all(parseXml(relsText), 'Relationship')) {
+    const target = resolvePath(wbPath, r.getAttribute('Target') || '');
+    rels.set(r.getAttribute('Id'), target);
+    if (/\/sharedStrings$/.test(r.getAttribute('Type') || '')) sstPath = target;
+  }
+  const sst = [];
+  if (sstPath) { const t = await readText(sstPath); if (t) for (const si of kids(parseXml(t).documentElement, 'si')) sst.push(richText(si)); }
+  const out = [];
+  for (const s of all(parseXml(wbText), 'sheet')) {
+    const text = await readText(rels.get(attrLocal(s, 'id')));
+    if (text) out.push({ name: s.getAttribute('name') || '', grid: readGrid(parseXml(text), sst) });
+  }
+  return out;
+}
+function catalogHeader(cells) {
+  const cols = {}, art = [], size = [], photo = [];
+  for (const [c, cell] of cells) {
+    const h = String(cell.text).toLowerCase().replace(/\s+/g, ' ').trim();
+    if (!h) continue;
+    if (cols.bc == null && /штрих|barcode|ean|баркод/.test(h)) cols.bc = c;
+    else if (/артикул/.test(h)) art.push([c, h]);
+    else if (/фото|изображ|картин|image|photo/.test(h)) photo.push([c, h]);
+    else if (cols.color == null && /цвет/.test(h) && !/код цвета/.test(h)) cols.color = c;
+    else if (/размер/.test(h) && !/упаков|таблиц|сетк|габарит/.test(h)) size.push([c, h]);
+    else if (cols.name == null && /наименование|название/.test(h)) cols.name = c;
+  }
+  if (art.length) cols.art = (art.find(([, h]) => !/wb|ozon|озон|маркетплейс|sku/.test(h)) || art[0])[0];
+  if (size.length) cols.size = (size.find(([, h]) => /российск/.test(h)) || size.find(([, h]) => /производ/.test(h)) || size[0])[0];
+  if (photo.length) cols.photo = (photo.find(([, h]) => /главн/.test(h)) || photo[0])[0];
+  if (cols.bc == null && cols.art == null) return null;
+  if (cols.name == null && cols.color == null && cols.size == null && cols.photo == null) return null;
+  return cols;
+}
+const firstUrl = (s) => { const m = /https?:\/\/[^\s,;"']+/.exec(s || ''); return m ? m[0] : ''; };
+function parseCatalog(sheets) {
+  for (const sh of sheets) {
+    const nums = Array.from(sh.grid.keys()).sort((a, b) => a - b);
+    for (const hr of nums.slice(0, 15)) {
+      const cols = catalogHeader(sh.grid.get(hr));
+      if (!cols) continue;
+      const items = [];
+      for (const r of nums) {
+        if (r <= hr) continue;
+        const cells = sh.grid.get(r);
+        const get = (c) => (c == null || !cells.get(c) ? '' : String(cells.get(c).text).trim());
+        const a = get(cols.art);
+        const b = get(cols.bc).split(/[\s,;]+/).filter((x) => /^[A-Za-z0-9]{6,}$/.test(x));
+        if (!a && !b.length) continue;
+        const it = { a: a, b: b, n: get(cols.name), c: get(cols.color), s: get(cols.size), p: firstUrl(get(cols.photo)) };
+        if (!it.n && !it.c && !it.s && !it.p) continue;
+        items.push(it);
+      }
+      if (items.length) return { items: items, sheet: sh.name };
+    }
+  }
+  return null;
+}
+function setCatalog(cat, fileName) {
+  const byBc = {}, byArt = {};
+  cat.items.forEach((it, i) => { it.b.forEach((b) => { byBc[b.toUpperCase()] = i; }); if (it.a) byArt[it.a.toLowerCase()] = i; });
+  catalog = { items: cat.items, byBc: byBc, byArt: byArt, file: fileName, at: Date.now() };
+  infoCache.clear();
+  return store.set(CKEY, catalog);
+}
+async function loadCatalog(file) {
+  try {
+    const cat = parseCatalog(await readGrids(await file.arrayBuffer()));
+    if (!cat) { toast('Не нашёл в файле колонок со штрихкодом или артикулом и с названием, цветом, размером или фото.'); return; }
+    const kept = setCatalog(cat, file.name);
+    const found = book ? Array.from(groups.values()).filter((g) => catalogFind(g.barcode, g.article)).length : 0;
+    toast('Справочник загружен: ' + fmtN(cat.items.length) + ' ' + plural(cat.items.length, 'товар', 'товара', 'товаров') + (book ? ', из этой поставки найдено ' + found + ' из ' + groups.size : '') + '.' + (kept ? '' : ' Он не поместился в память браузера: после перезагрузки страницы загрузите его снова.'));
+    logEvt('info', 'Загружен справочник товаров «' + file.name + '».');
+  } catch (e) { toast('Не получилось прочитать справочник: ' + (e && e.message ? e.message : e)); }
   render();
 }
 
@@ -1329,51 +1757,107 @@ function renderWork() {
   $('fileTitle').textContent = book.demo ? 'Пример поставки' : (no ? 'Заявка ' + no : book.name);
   $('fileMeta').textContent = fmtN(t.need) + ' ' + plural(t.need, 'экземпляр', 'экземпляра', 'экземпляров') + ', ' + groups.size + ' ' + plural(groups.size, 'товар', 'товара', 'товаров') + ', ' + cargos.length + ' ' + plural(cargos.length, 'коробка', 'коробки', 'коробок') + '. Файл: ' + book.name;
   const complete = t.need > 0 && t.done === t.need;
-  const ex = $('btnExport');
-  ex.className = 'btn ' + (complete ? 'go' : 'primary');
+  $('btnExport').className = 'btn ' + (complete ? 'go' : 'primary');
+  const vb = $('btnVerify');
+  vb.setAttribute('aria-pressed', String(verify.on));
+  $('verifyText').textContent = verify.on ? 'Проверка: ' + verified.size : 'Проверка';
   renderLabel(t, complete);
   renderItems();
   renderSide(t, complete);
   updateScanner();
 }
+const swatches = (info) => info.colors.filter((c) => c.hex).map((c) => '<i class="sw" style="background:' + c.hex + '"></i>').join('');
+function setProductView(g, diffWith) {
+  const attrs = $('attrs'), tag = $('sizeTag'), th = $('thumb'), pn = $('pname');
+  if (!g) {
+    attrs.hidden = true; tag.hidden = true; th.hidden = true; pn.hidden = true;
+    $('code').textContent = '';
+    return;
+  }
+  const info = productInfo(g);
+  const prev = diffWith ? productInfo(diffWith) : null;
+  const similar = !!prev && sharesSome(info, prev);
+  $('title').textContent = g.article || g.barcode;
+  pn.hidden = !info.name; pn.textContent = info.name || '';
+  if (info.photo) { if (th.getAttribute('src') !== info.photo) th.setAttribute('src', info.photo); th.hidden = false; } else th.hidden = true;
+  let chips = '';
+  if (info.colors.length) {
+    const ch = similar && colorKey(info) !== colorKey(prev);
+    chips += '<span class="attr' + (ch ? ' changed' : '') + '">' + swatches(info) + esc(info.colors.map((c) => c.name).join(' / ')) + (ch ? '<em>другой цвет</em>' : '') + '</span>';
+  }
+  if (info.gender) {
+    const ch = similar && !!prev.gender && info.gender !== prev.gender;
+    chips += '<span class="attr' + (ch ? ' changed' : '') + '">' + esc(info.gender) + (ch ? '<em>другой пол</em>' : '') + '</span>';
+  }
+  attrs.innerHTML = chips; attrs.hidden = !chips;
+  if (info.size) {
+    tag.hidden = false;
+    $('sizeVal').textContent = info.size.main;
+    $('sizeWords').textContent = info.size.words || '';
+    $('sizeWords').hidden = !info.size.words;
+    const ch = similar && sizeKey(info) !== sizeKey(prev);
+    tag.classList.toggle('changed', ch);
+    $('sizeChanged').hidden = !ch;
+  } else tag.hidden = true;
+  $('code').textContent = 'Штрихкод ' + g.barcode;
+}
+function setRing(done, need, full) {
+  $('ring').hidden = false; $('bigIc').hidden = true;
+  const val = $('ringVal');
+  val.style.strokeDasharray = String(RING_C);
+  val.style.strokeDashoffset = String(RING_C * (1 - (need ? done / need : 0)));
+  $('ring').classList.toggle('full', !!full);
+  $('ringDone').textContent = done; $('ringNeed').textContent = need;
+}
 function renderLabel(t, complete) {
-  $('labelWork').hidden = complete;
-  $('labelDone').hidden = !complete;
-  $('btnUnselect').hidden = complete || !cur.key;
-  if (complete) {
+  const showDone = complete && !verify.on;
+  $('label').classList.toggle('verifying', verify.on);
+  $('labelWork').hidden = showDone;
+  $('labelDone').hidden = !showDone;
+  $('btnUnselect').hidden = showDone || verify.on || !cur.key;
+  if (showDone) {
     $('doneTitle').textContent = 'Все ' + fmtN(t.need) + ' ' + plural(t.need, 'экземпляр привязан', 'экземпляра привязаны', 'экземпляров привязаны');
-    $('doneText').textContent = book.exportedAt ? 'Файл скачан. Загрузите его в заявку в личном кабинете. Если что-то поменяете, скачайте файл ещё раз.' : 'Повторов нет, количество совпадает с шаблоном. Скачайте файл и загрузите его в заявку в личном кабинете.';
+    $('doneText').textContent = book.exportedAt ? 'Файл скачан. Загрузите его в заявку в личном кабинете. Если что-то поменяете, скачайте файл ещё раз.' : 'Повторов нет, количество совпадает с шаблоном. Скачайте файл и загрузите его в заявку в личном кабинете. Перед этим можно выборочно сверить изделия кнопкой «Проверка».';
     return;
   }
   const multi = cargos.length > 1;
-  $('boxChip').hidden = !multi && !cur.cargo;
+  $('boxChip').hidden = verify.on || (!multi && !cur.cargo);
   $('boxText').textContent = cur.cargo ? 'Коробка ' + tail(cur.cargo, 6) : 'Коробка не выбрана';
+  if (verify.on) {
+    const g = verify.shown ? groups.get(verify.shown) : null;
+    setRing(verified.size, t.done, t.done > 0 && verified.size >= t.done);
+    $('lead').textContent = 'Режим проверки: сверено ' + verified.size + ' из ' + t.done;
+    if (g) {
+      setProductView(g, null);
+      $('hint').textContent = verify.qr ? 'QR привязан к этому товару. Сверьте с изделием или отсканируйте его штрихкод' : (verify.key ? 'Теперь отсканируйте QR на этом же изделии' : 'Отсканируйте QR следующего изделия');
+    } else {
+      setProductView(null);
+      $('title').textContent = 'Отсканируйте QR на изделии';
+      $('hint').textContent = 'Покажу, к какому товару он привязан. Затем штрихкод изделия, и я сверю пару';
+    }
+    return;
+  }
   const g = cur.key ? groups.get(cur.key) : null;
   if (g) {
-    $('ring').hidden = false; $('bigIc').hidden = true;
-    const pct = g.need ? g.done / g.need : 0;
-    const val = $('ringVal');
-    val.style.strokeDasharray = String(RING_C);
-    val.style.strokeDashoffset = String(RING_C * (1 - pct));
-    $('ring').classList.toggle('full', g.done === g.need);
-    $('ringDone').textContent = g.done; $('ringNeed').textContent = g.need;
+    setRing(g.done, g.need, g.done === g.need);
     $('lead').textContent = 'Сейчас сканируем';
-    $('title').textContent = g.article || g.barcode;
+    setProductView(g, cur.prev && cur.prev !== g.key ? groups.get(cur.prev) : null);
     const left = g.need - g.done;
-    $('hint').textContent = left > 0 ? 'Сканируйте QR-коды экземпляров, осталось ' + left : 'Готово. Отсканируйте следующий товар';
-    $('code').textContent = 'Штрихкод ' + g.barcode;
+    $('hint').textContent = left > 0 ? 'Сканируйте QR-коды экземпляров, осталось ' + left : 'Готово. Отсканируйте штрихкод следующего товара';
   } else {
     $('ring').hidden = true; $('bigIc').hidden = false;
+    const p = cur.prev ? groups.get(cur.prev) : null;
     const wantBox = multi && !cur.explicit;
     $('bigIcSvg').innerHTML = wantBox ? ICON.box : ICON.barcode;
-    $('lead').textContent = 'Следующий шаг';
-    $('title').textContent = wantBox ? 'Отсканируйте коробку или товар' : 'Отсканируйте товар';
+    setProductView(null);
+    const finished = !!p && p.done === p.need;
+    $('lead').textContent = finished ? p.article + ' готов: ' + p.need + ' из ' + p.need : 'Следующий шаг';
+    $('title').textContent = wantBox ? 'Отсканируйте коробку или товар' : (finished ? 'Отсканируйте следующий товар' : 'Отсканируйте товар');
     $('hint').textContent = wantBox ? 'Штрихкод грузоместа, затем товары из него и их QR-коды' : 'Штрихкод с этикетки товара, затем QR-коды всех его экземпляров';
-    $('code').textContent = '';
   }
 }
 function renderItems() {
-  const q = query.trim().toLowerCase();
+  const words = query.trim().toLowerCase().replace(/–/g, '-').split(/\s+/).filter(Boolean);
   const multi = cargos.length > 1;
   let cAll = 0, cTodo = 0, cDone = 0, html = '';
   for (const key of order) {
@@ -1382,23 +1866,29 @@ function renderItems() {
     cAll++; if (done) cDone++; else cTodo++;
     if (filter === 'todo' && done) continue;
     if (filter === 'done' && !done) continue;
-    if (q && (g.article + ' ' + g.barcode).toLowerCase().indexOf(q) < 0) continue;
+    const info = productInfo(g);
+    const sub = [info.colors.map((c) => c.name).join(' / '), info.size ? info.size.main : '', info.gender || '', g.barcode, multi ? 'коробка ' + tail(g.cargo, 6) : ''].filter(Boolean).join(', ');
+    const hay = (g.article + ' ' + sub + ' ' + (info.name || '')).toLowerCase().replace(/–/g, '-');
+    if (words.length && !words.every((w) => hay.indexOf(w) >= 0)) continue;
     const pct = g.need ? Math.round(100 * g.done / g.need) : 0;
     const open = expanded.has(key);
-    const cls = 'item' + (key === cur.key ? ' cur' : '') + (done ? ' done' : (g.done ? ' part' : ''));
-    html += '<li class="' + cls + '" data-key="' + esc(key) + '" style="--p:' + pct + '%" title="' + (key === cur.key ? 'Нажмите ещё раз, чтобы снять выбор' : 'Нажмите, чтобы выбрать вручную') + '">' +
+    const vcount = verify.on ? g.idx.filter((i) => rows[i].qr && verified.has(rows[i].qr)).length : 0;
+    const cls = 'item' + (key === cur.key && !verify.on ? ' cur' : '') + (verify.on && key === verify.shown ? ' cur' : '') + (done ? ' done' : (g.done ? ' part' : ''));
+    const tip = pickAlias ? 'Нажмите, чтобы запомнить штрихкод для этого товара' : (verify.on ? 'Нажмите, чтобы сверить с этим товаром' : (key === cur.key ? 'Нажмите ещё раз, чтобы снять выбор' : 'Нажмите, чтобы выбрать вручную'));
+    html += '<li class="' + cls + '" data-key="' + esc(key) + '" style="--p:' + pct + '%" title="' + esc(tip) + '">' +
       '<span class="st">' + (done ? svg('check') : '') + '</span>' +
-      '<div class="it-main"><b>' + esc(g.article || '(без артикула)') + '</b><span>' + esc(g.barcode + (multi ? ', коробка ' + tail(g.cargo, 6) : '')) + '</span></div>' +
-      '<div class="it-prog"><span class="bar"><span style="width:' + pct + '%"></span></span><span class="n">' + g.done + ' из ' + g.need + '</span></div>' +
+      '<div class="it-main"><b>' + esc(g.article || '(без артикула)') + '</b><span>' + swatches(info) + esc(sub) + '</span></div>' +
+      '<div class="it-prog"><span class="bar"><span style="width:' + pct + '%"></span></span><span class="n">' + g.done + ' из ' + g.need + (verify.on ? ', сверено ' + vcount : '') + '</span></div>' +
       '<button class="exp" type="button" data-act="toggle" aria-expanded="' + open + '" aria-label="Показать QR-коды товара">' + svg('chevron') + '</button></li>';
     if (open) {
       html += '<li class="codes-row"><ul class="codes">' + g.idx.map((i) => {
         const r = rows[i];
-        return '<li><span class="rn">строка ' + r.r + '</span>' + (r.qr ? '<span>' + esc(r.qr) + '</span><button class="x" type="button" data-act="del" data-i="' + i + '">Убрать</button>' : '<span class="empty">ещё нет QR</span>') + '</li>';
+        return '<li><span class="rn">строка ' + r.r + '</span>' + (r.qr ? '<span>' + esc(r.qr) + (verified.has(r.qr) ? ' ✓' : '') + '</span><button class="x" type="button" data-act="del" data-i="' + i + '">Убрать</button>' : '<span class="empty">ещё нет QR</span>') + '</li>';
       }).join('') + '</ul></li>';
     }
   }
-  $('items').innerHTML = html || '<li class="nothing">' + (q ? 'Ничего не найдено по запросу «' + esc(query) + '».' : (filter === 'todo' ? 'Все товары готовы.' : 'Пока ни один товар не готов.')) + '</li>';
+  $('items').classList.toggle('picking', !!pickAlias);
+  $('items').innerHTML = html || '<li class="nothing">' + (words.length ? 'Ничего не найдено по запросу «' + esc(query) + '».' : (filter === 'todo' ? 'Все товары готовы.' : 'Пока ни один товар не готов.')) + '</li>';
   $('cAll').textContent = cAll; $('cTodo').textContent = cTodo; $('cDone').textContent = cDone;
   for (const b of $('filters').children) b.setAttribute('aria-pressed', String(b.dataset.f === filter));
 }
@@ -1429,6 +1919,7 @@ function renderSide(t, complete) {
   items.push(conflicts.length ? { lvl: 'warn', title: 'Коды из прошлых поставок: ' + conflicts.length, text: conflicts.slice(0, 2).map((r) => r.qr + ' в «' + history[r.qr][0] + '»').join('; ') + '. Уберите их и наклейте новые этикетки.' }
                               : (hOther ? { lvl: 'ok', title: 'С прошлыми поставками не пересекается', text: 'Сверено с ' + fmtN(hOther) + ' ' + plural(hOther, 'кодом', 'кодами', 'кодами') + ' из архива.' }
                                         : { lvl: 'info', title: 'Архив прошлых поставок пуст', text: 'Он пополняется сам при каждом скачивании файла.' }));
+  if (verified.size) items.push({ lvl: 'ok', title: 'Выборочная проверка: ' + verified.size + ' из ' + t.done, text: 'Эти пары QR и штрихкода изделия совпали с файлом.' });
   const sIc = { ok: 'check', warn: 'alert', err: 'x', info: 'info' };
   $('checks').innerHTML = items.map((x) => '<li class="' + x.lvl + '"><span class="s">' + svg(sIc[x.lvl]) + '</span><span><b>' + esc(x.title) + '</b><span>' + esc(x.text) + '</span></span></li>').join('');
   const iss = $('issues');
@@ -1439,6 +1930,14 @@ function renderSide(t, complete) {
   const files = new Set(Object.values(history).map((h) => h[0]));
   $('archiveText').textContent = hn ? 'В архиве ' + fmtN(hn) + ' ' + plural(hn, 'код', 'кода', 'кодов') + ' из ' + files.size + ' ' + plural(files.size, 'файла', 'файлов', 'файлов') + '. Каждый новый QR сверяется с архивом, чтобы одна этикетка не попала в две поставки.' : 'Архив пуст. Коды попадают сюда сами при каждом скачивании файла. Можно добавить и файлы прошлых поставок.';
   $('btnArchiveClear').disabled = !hn;
+  const found = catalog && catalog.items ? gs.filter((g) => catalogFind(g.barcode, g.article)).length : 0;
+  $('catText').textContent = catalog && catalog.items
+    ? 'Загружен справочник «' + catalog.file + '»: ' + fmtN(catalog.items.length) + ' ' + plural(catalog.items.length, 'товар', 'товара', 'товаров') + '. Из этой поставки найдено ' + found + ' из ' + gs.length + '.'
+    : 'Без справочника цвет, размер и пол берутся из артикула. Загрузите выгрузку товаров из личного кабинета (Excel), чтобы видеть название, цвет, размер и фото из карточки.';
+  $('btnCatClear').disabled = !(catalog && catalog.items);
+  const an = Object.keys(aliases).length;
+  $('aliasText').textContent = an ? 'Запомнено дополнительных штрихкодов: ' + an + '. Они сразу выбирают свой товар.' : 'Если на изделии другой штрихкод, чем в шаблоне, страница предложит его запомнить.';
+  $('btnAliasClear').disabled = !an;
   $('btnUndo').disabled = !undoStack.length;
   $('btnClear').disabled = !t.done;
   $('log').innerHTML = logItems.length ? logItems.map((l) => '<li class="' + l.lvl + '"><time>' + fmtTime(l.ts) + '</time><span><i class="m"></i>' + esc(l.text) + '</span></li>').join('') : '<li><time></time><span>Здесь появятся сканы.</span></li>';
@@ -1447,7 +1946,7 @@ function renderSide(t, complete) {
 /* ---------- keep the scanner field armed ---------- */
 const scanInput = $('scanInput');
 const TEXT_TYPES = new Set(['text', 'search', 'email', 'number', 'tel', 'url', 'password']);
-function isTyping(el) { return el && ((el.tagName === 'INPUT' && TEXT_TYPES.has(el.type)) || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'); }
+function isTyping(el) { return el && ((el.tagName === 'INPUT' && TEXT_TYPES.has(el.type)) || el.tagName === 'TEXTAREA'); }
 function updateScanner() {
   const on = screen === 'work' && document.activeElement === scanInput && document.hasFocus();
   $('scanner').classList.toggle('off', !on);
@@ -1462,7 +1961,7 @@ scanInput.addEventListener('focus', updateScanner);
 scanInput.addEventListener('blur', () => setTimeout(updateScanner, 0));
 window.addEventListener('focus', () => setTimeout(refocus, 0));
 window.addEventListener('blur', () => setTimeout(updateScanner, 0));
-document.addEventListener('click', () => setTimeout(refocus, 0));
+document.addEventListener('click', (e) => { if (e.target && e.target.closest && e.target.closest('select')) return; setTimeout(refocus, 0); });
 document.addEventListener('keydown', (e) => {
   if (screen !== 'work' || isTyping(document.activeElement)) return;
   if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -1474,7 +1973,12 @@ $('scanForm').addEventListener('submit', (e) => { e.preventDefault(); const v = 
 scanInput.addEventListener('keydown', (e) => {
   if (e.key === 'Tab' && scanInput.value.trim()) { e.preventDefault(); const v = scanInput.value; scanInput.value = ''; onScan(v); }
   else if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z' || e.key === 'я') && !scanInput.value) { e.preventDefault(); undo(); }
-  else if (e.key === 'Escape') { scanInput.value = ''; unselect(); }
+  else if (e.key === 'Escape') {
+    scanInput.value = '';
+    if (pickAlias) cancelPick();
+    else if (verify.on) { if (verify.qr || verify.key) { verify.qr = null; verify.key = null; verify.shown = null; render(); } }
+    else unselect();
+  }
 });
 $('scanner').addEventListener('click', refocus);
 $('btnUnselect').addEventListener('click', unselect);
@@ -1491,7 +1995,7 @@ $('btnExport').addEventListener('click', onExportClick);
 $('btnExport2').addEventListener('click', onExportClick);
 $('btnUndo').addEventListener('click', undo);
 $('btnClear').addEventListener('click', () => askConfirm('Убрать все ' + totals().done + ' привязанных QR в этой поставке? Шаблон останется, коды придётся сканировать заново.', 'Очистить', () => {
-  rows.forEach((r) => { r.qr = null; }); undoStack = []; recount(); changed(); cur.key = null;
+  rows.forEach((r) => { r.qr = null; }); undoStack = []; verified = new Set(); recount(); changed(); cur.key = null; cur.prev = null;
   feedback('warn', 'Все коды убраны', 'Можно начинать сканирование заново.'); saveSession(); render();
 }));
 $('btnArchiveAdd').addEventListener('click', () => $('archiveInput').click());
@@ -1502,7 +2006,7 @@ $('btnConfirmNo').addEventListener('click', () => { pendingConfirm = null; $('co
 $('btnResume').addEventListener('click', () => {
   const s = pendingResume; pendingResume = null; $('resumeBanner').hidden = true;
   if (!s) return;
-  openBook(book, { codes: s.codes, undo: s.undo });
+  openBook(book, { codes: s.codes, undo: s.undo, verified: s.verified });
   const t = totals();
   setResult('info', 'Продолжаем: ' + t.done + ' из ' + t.need, 'Сохранённое сканирование восстановлено.');
   saveSession(); render();
@@ -1530,17 +2034,49 @@ $('items').addEventListener('click', (e) => {
   if (!li) return;
   const key = li.dataset.key;
   if (btn && btn.dataset.act === 'toggle') { if (expanded.has(key)) expanded.delete(key); else expanded.add(key); renderItems(); return; }
+  if (pickAlias) { saveAlias(pickAlias, key); return; }
+  if (verify.on) { lastActionAt = Date.now(); verifyProduct([key]); saveSession(); render(); return; }
   selectGroup(key);
 });
 $('filters').addEventListener('click', (e) => { const b = e.target.closest('[data-f]'); if (b) { filter = b.dataset.f; renderItems(); } });
 $('search').addEventListener('input', (e) => { query = e.target.value; renderItems(); });
-$('search').addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.target.value = ''; query = ''; renderItems(); scanInput.focus(); } });
-for (const [tab, panel] of [['tabLog', 'panelLog'], ['tabSet', 'panelSet'], ['tabArc', 'panelArc']]) {
+$('search').addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { e.target.value = ''; query = ''; renderItems(); scanInput.focus(); return; }
+  if (e.key !== 'Enter') return;
+  /* a scanner that types into the search box still switches the product */
+  const raw = e.target.value, v = normalize(raw).value;
+  if (v && (asQr(v) || matchCargo(v) || matchProduct(v).length || /^\d{8,}$/.test(v))) {
+    e.preventDefault(); e.target.value = ''; query = ''; scanInput.focus(); onScan(raw);
+  }
+});
+const TABS = [['tabLog', 'panelLog'], ['tabSet', 'panelSet'], ['tabCat', 'panelCat'], ['tabArc', 'panelArc']];
+for (const [tab, panel] of TABS) {
   $(tab).addEventListener('click', () => {
-    for (const [t2, p2] of [['tabLog', 'panelLog'], ['tabSet', 'panelSet'], ['tabArc', 'panelArc']]) { $(t2).setAttribute('aria-selected', String(t2 === tab)); $(p2).hidden = p2 !== panel; }
+    for (const [t2, p2] of TABS) { $(t2).setAttribute('aria-selected', String(t2 === tab)); $(p2).hidden = p2 !== panel; }
   });
 }
 $('tryBox').addEventListener('click', (e) => { const b = e.target.closest('[data-scan]'); if (b) onScan(b.dataset.scan); });
+$('resActs').addEventListener('click', (e) => { const b = e.target.closest('[data-ra]'); if (!b) return; const a = resActs[+b.dataset.ra]; if (a && a.fn) a.fn(); });
+$('btnVerify').addEventListener('click', () => setVerify(!verify.on));
+$('thumb').addEventListener('error', () => { $('thumb').hidden = true; });
+$('optBatch').checked = opts.batchCheck !== false;
+$('optBatch').addEventListener('change', (e) => { opts.batchCheck = e.target.checked; store.set(OKEY, opts); pendingQr = null; });
+$('optPause').value = String(opts.pauseMin == null ? 3 : opts.pauseMin);
+$('optPause').addEventListener('change', (e) => { opts.pauseMin = +e.target.value; store.set(OKEY, opts); e.target.blur(); setTimeout(refocus, 0); });
+$('btnCatAdd').addEventListener('click', () => $('catInput').click());
+$('catInput').addEventListener('change', (e) => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) loadCatalog(f); });
+$('btnCatClear').addEventListener('click', () => askConfirm('Убрать справочник товаров? Цвет, размер и пол снова будут браться из артикула.', 'Убрать', () => { catalog = null; store.del(CKEY); infoCache.clear(); toast('Справочник убран.'); render(); }));
+$('btnAliasClear').addEventListener('click', () => askConfirm('Забыть все запомненные штрихкоды? Их придётся запомнить заново.', 'Забыть', () => { aliases = {}; store.del(ALKEY); toast('Запомненные штрихкоды забыты.'); render(); }));
+/* after a break the product has to be scanned again */
+setInterval(() => {
+  if (screen !== 'work' || !book || verify.on || !cur.key || !opts.pauseMin) return;
+  if (Date.now() - lastActionAt <= opts.pauseMin * 60000) return;
+  const g = groups.get(cur.key);
+  cur.prev = cur.key; cur.key = null; pendingQr = null;
+  setResult('info', 'Товар сброшен после паузы', '«' + g.article + '» больше не выбран: после перерыва отсканируйте штрихкод товара ещё раз.');
+  logEvt('info', 'Товар «' + g.article + '» сброшен после паузы.');
+  render();
+}, 5000);
 
 let dragDepth = 0;
 const hasFiles = (e) => e.dataTransfer && Array.from(e.dataTransfer.types || []).indexOf('Files') >= 0;
