@@ -270,10 +270,24 @@ button,input{font:inherit;color:inherit}
 .x{margin-left:auto;border:0;background:transparent;color:var(--err);font-size:13px;font-weight:600;padding:4px 8px;border-radius:6px;cursor:pointer}
 .x:hover{background:var(--err-soft)}
 .items .nothing{padding:20px 16px;color:var(--muted);border-top:1px solid var(--line)}
+.box-head{display:grid;grid-template-columns:36px minmax(0,1fr) minmax(150px,220px) 36px;gap:12px;align-items:center;padding:12px 16px 12px 10px;border-top:1px solid var(--line);background:var(--surface-2);cursor:pointer}
+.box-head:hover{background:color-mix(in srgb,var(--surface-2) 70%,var(--line))}
+.box-head .bh-main{min-width:0}
+.box-head .bh-main b{display:block;font-weight:700;font-size:16px}
+.box-head .bh-main span{display:block;font-size:13px;color:var(--muted)}
+.box-head.done .bh-main b{color:var(--go)}
+.box-head.cur{box-shadow:inset 4px 0 0 var(--go)}
+.box-head .it-prog{grid-column:3}
+.items.boxed .item.in-box{padding-left:44px}
+.items.boxed .codes-row.in-box{padding-left:84px}
 @media (max-width:640px){
   .item{grid-template-columns:28px minmax(0,1fr) auto;row-gap:8px}
   .it-prog{grid-column:2/3;grid-row:2}
   .codes-row{padding-left:16px}
+  .box-head{grid-template-columns:36px minmax(0,1fr)}
+  .box-head .it-prog{grid-column:2}
+  .items.boxed .item.in-box{padding-left:24px}
+  .items.boxed .codes-row.in-box{padding-left:24px}
   .search input{width:100%}
   .list-tools,.search{width:100%}
 }
@@ -289,7 +303,7 @@ button,input{font:inherit;color:inherit}
 .pill.go{background:var(--go-soft);color:var(--go)}
 .pill.warn{background:var(--warn-soft);color:var(--warn)}
 .total .bar{height:10px;margin-top:14px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin-top:14px}
 .stats div{padding:10px 12px;border-radius:10px;background:var(--surface-2)}
 .stats b{display:block;font-size:20px;font-weight:700}
 .stats span{font-size:13px;color:var(--muted)}
@@ -492,6 +506,7 @@ button,input{font:inherit;color:inherit}
           <div class="stats">
             <div><b id="statGroups">0 из 0</b><span>товаров готово</span></div>
             <div><b id="statLeft">0</b><span>QR осталось</span></div>
+            <div id="statBoxesCell" hidden><b id="statBoxes">0 из 0</b><span>коробок собрано</span></div>
           </div>
         </div>
 
@@ -517,6 +532,11 @@ button,input{font:inherit;color:inherit}
             <div class="snd">
               <div class="snd-row"><label for="optVolume"><b>Громкость</b></label><input type="range" id="optVolume" min="0" max="100" step="5" value="80"></div>
               <div class="snd-test"><span>Послушать:</span><button class="btn sm" type="button" data-snd="ok">Привязан</button><button class="btn sm" type="button" data-snd="group">Товар готов</button><button class="btn sm" type="button" data-snd="warn">Уже был</button><button class="btn sm" type="button" data-snd="err">Ошибка</button></div>
+            </div>
+            <div class="snd">
+              <div class="snd-row"><label for="optVoice"><b>Голос</b></label><select class="sel" id="optVoice"><option value="err">Озвучивать ошибки</option><option value="all">Ошибки и предупреждения</option><option value="off">Не озвучивать</option></select></div>
+              <div class="snd-row" id="voicePickRow"><label class="sr" for="optVoiceName">Чей голос</label><select class="sel" id="optVoiceName"></select><button class="btn sm" type="button" data-snd="voice">Послушать</button></div>
+              <p class="hint-s" id="voiceHint" hidden>В этом браузере нет русского голоса, поэтому голосовые подсказки не звучат. В Windows его можно добавить: Параметры, Время и язык, Речь.</p>
             </div>
             <div class="set-actions">
               <button class="btn" type="button" id="btnUndo"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>Отменить последний скан</button>
@@ -882,6 +902,9 @@ let rows = [];
 let groups = new Map();
 let order = [];
 let cargos = [];
+let boxes = [];
+let boxByCargo = new Map();
+let boxOpen = new Map();
 let bcIndex = new Map();
 let artIndex = new Map();
 let qrIndex = new Map();
@@ -903,7 +926,7 @@ let query = '';
 let history = store.get(HKEY, {}) || {};
 let aliases = store.get(ALKEY, {}) || {};
 let catalog = store.get(CKEY, null);
-const opts = Object.assign({ strict: false, sound: true, volume: 80, batchCheck: true, pauseMin: 3 }, store.get(OKEY, {}) || {});
+const opts = Object.assign({ strict: false, sound: true, volume: 80, batchCheck: true, pauseMin: 3, voice: 'err', voiceName: '' }, store.get(OKEY, {}) || {});
 
 function buildGroups() {
   groups = new Map(); order = []; bcIndex = new Map(); artIndex = new Map();
@@ -915,6 +938,8 @@ function buildGroups() {
     g.idx.push(i); g.need++;
   });
   cargos = Array.from(new Set(rows.map((r) => r.cargo)));
+  boxes = cargos.map((c, i) => ({ cargo: c, n: i + 1, type: (rows.find((r) => r.cargo === c) || {}).type || '' }));
+  boxByCargo = new Map(boxes.map((b) => [b.cargo, b]));
   for (const g of groups.values()) {
     if (g.barcode) {
       const k = g.barcode.toUpperCase();
@@ -935,6 +960,16 @@ const supplyNo = (name) => { const m = String(name || '').match(/(\d{8,})(?!.*\d
 function historyConflict(code) { const h = history[code]; return h && book && h[0] !== book.name ? h : null; }
 function changed() { if (book) book.exportedAt = null; }
 const freeSlot = (g) => g.idx.find((i) => !rows[i].qr);
+function boxName(c) {
+  const b = boxByCargo.get(c);
+  if (!b) return 'Коробка';
+  return (/палет|паллет/i.test(b.type) ? 'Палета ' : 'Коробка ') + b.n;
+}
+function boxStats(c) {
+  let need = 0, done = 0, n = 0, ready = 0;
+  for (const g of groups.values()) if (g.cargo === c) { need += g.need; done += g.done; n++; if (g.done === g.need) ready++; }
+  return { need: need, done: done, n: n, ready: ready };
+}
 
 /* label numbers: QR labels come off the roll in order, so each product's codes sit close together */
 const qrNum = (code) => Number(code.slice(2));
@@ -987,7 +1022,7 @@ function openBook(b, o) {
   cur = { cargo: cargos.length === 1 ? cargos[0] : null, key: null, explicit: false, prev: null };
   lastQr = null; pendingQr = null; pickAlias = null; verify = { on: false, qr: null, key: null, shown: null };
   lastActionAt = Date.now();
-  expanded = new Set(); logItems = []; filter = 'all'; query = ''; $('search').value = '';
+  expanded = new Set(); boxOpen = new Map(); logItems = []; filter = 'all'; query = ''; $('search').value = '';
   pendingResume = null; $('resumeBanner').hidden = true; $('confirmBanner').hidden = true;
   $('demoNote').hidden = !book.demo;
   $('tryBox').hidden = !book.demo;
@@ -1155,8 +1190,33 @@ const SND = {
   group: () => { note(1047, 0, 0.16, { gain: 0.18 }); note(1319, 0.12, 0.16, { gain: 0.18 }); note(1568, 0.24, 0.32, { gain: 0.18 }); },
   /* вся поставка готова: четыре ноты вверх */
   all: () => { note(1047, 0, 0.16, { gain: 0.18 }); note(1319, 0.13, 0.16, { gain: 0.18 }); note(1568, 0.26, 0.16, { gain: 0.18 }); note(2093, 0.39, 0.6, { gain: 0.16, hold: 0.2 }); },
+  /* короткий гудок перед голосовой подсказкой */
+  errShort: () => note(440, 0, 0.3, Object.assign({ glide: 0.94 }, BUZZ)),
   none: () => {}
 };
+/* ---------- voice: short spoken hints for errors, system voices of the browser ---------- */
+const synth = window.speechSynthesis || null;
+let ruVoices = [];
+function loadVoices() { try { ruVoices = synth ? synth.getVoices().filter((v) => /^ru/i.test(v.lang || '')) : []; } catch (e) { ruVoices = []; } }
+function pickVoice() { return ruVoices.find((v) => v.name === opts.voiceName) || ruVoices.find((v) => /google/i.test(v.name)) || ruVoices[0] || null; }
+const voiceOn = () => !!synth && opts.voice !== 'off' && ruVoices.length > 0;
+let speakTimer = null;
+function hush() { clearTimeout(speakTimer); try { if (synth && (synth.speaking || synth.pending)) synth.cancel(); } catch (e) { /* ignore */ } }
+function speak(text, delay) {
+  if (!synth || !text) return;
+  const vol = Math.max(0, Math.min(1, (opts.volume == null ? 80 : opts.volume) / 100));
+  if (!vol) return;
+  speakTimer = setTimeout(() => {
+    try {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'ru-RU'; u.rate = 1.1; u.volume = vol;
+      const v = pickVoice();
+      if (v) { try { u.voice = v; } catch (e) { /* the default Russian voice will do */ } }
+      synth.cancel();
+      synth.speak(u);
+    } catch (e) { /* speech is optional */ }
+  }, delay || 0);
+}
 const RES_ICON = { ok: 'check', warn: 'alert', err: 'x', info: 'info' };
 let flashTimer = null;
 let resActs = [];
@@ -1170,7 +1230,8 @@ function setResult(lvl, title, detail, actions) {
   box.hidden = !resActs.length;
   box.innerHTML = resActs.map((a, i) => '<button class="btn sm' + (a.primary ? ' primary' : '') + '" type="button" data-ra="' + i + '">' + esc(a.label) + '</button>').join('');
 }
-function feedback(lvl, title, detail, sound, actions) {
+/* say: spoken phrase; a string is spoken in both voice modes, {text, minor: true} only in «ошибки и предупреждения» */
+function feedback(lvl, title, detail, sound, actions, say) {
   setResult(lvl, title, detail, actions);
   const label = $('label');
   label.classList.remove('f-ok', 'f-err', 'f-warn');
@@ -1180,7 +1241,11 @@ function feedback(lvl, title, detail, sound, actions) {
     clearTimeout(flashTimer);
     flashTimer = setTimeout(() => label.classList.remove('f-ok', 'f-err', 'f-warn'), lvl === 'err' ? 900 : 350);
   }
-  (SND[sound || lvl] || SND.info)();
+  hush();
+  const s = typeof say === 'string' ? { text: say } : say;
+  const talk = !!(s && s.text && (lvl === 'err' || lvl === 'warn') && voiceOn() && (opts.voice === 'all' || !s.minor));
+  if (talk && (sound || lvl) === 'err') { SND.errShort(); speak(s.text, 330); }
+  else { (SND[sound || lvl] || SND.info)(); if (talk) speak(s.text, 300); }
   logEvt(lvl, title + (detail ? '. ' + detail : ''));
 }
 function logEvt(lvl, text) {
@@ -1246,9 +1311,9 @@ function onScan(raw) {
   render();
 }
 function unknownCode(v) {
-  if (/^ii/i.test(v)) { feedback('err', 'QR считался не полностью', '«' + v + '» короче обычного: код экземпляра — это ii и 11 цифр. Отсканируйте этикетку ещё раз.'); return; }
+  if (/^ii/i.test(v)) { feedback('err', 'QR считался не полностью', '«' + v + '» короче обычного: код экземпляра — это ii и 11 цифр. Отсканируйте этикетку ещё раз.', 'err', null, 'Код считался не полностью. Отсканируйте ещё раз'); return; }
   feedback('err', 'Этого кода нет в поставке', '«' + v + '» — не QR экземпляра и не товар или коробка из шаблона. Если это другой штрихкод вашего товара, его можно запомнить.', 'err',
-    [{ label: 'Это штрихкод товара…', fn: () => startPick(v) }]);
+    [{ label: 'Это штрихкод товара…', fn: () => startPick(v) }], 'Этого кода нет в поставке');
 }
 function startPick(code) {
   pickAlias = code.toUpperCase();
@@ -1277,7 +1342,8 @@ function onCargo(c) {
     const k2 = c + '|' + (g.barcode || ('#' + g.article));
     cur.key = groups.has(k2) ? k2 : null;
   }
-  feedback('info', 'Коробка ' + tail(c, 6) + ' выбрана', 'Теперь сканируйте товары из этой коробки.');
+  const bs = boxStats(c);
+  feedback('info', (cargos.length > 1 ? boxName(c) : 'Коробка') + ' выбрана', 'Грузоместо ' + tail(c, 6) + '. ' + (bs.done < bs.need ? 'Осталось ' + (bs.need - bs.done) + ' QR в ' + (bs.n - bs.ready) + ' ' + plural(bs.n - bs.ready, 'товаре', 'товарах', 'товарах') + '. Сканируйте товары из этой коробки.' : 'В ней всё уже собрано.'));
 }
 function onProduct(keys) {
   let key = null;
@@ -1285,12 +1351,12 @@ function onProduct(keys) {
     key = keys.find((k) => groups.get(k).cargo === cur.cargo) || null;
     if (!key) {
       const g0 = groups.get(keys[0]);
-      feedback('err', 'Этого товара нет в коробке ' + tail(cur.cargo, 6), '«' + g0.article + '» по шаблону лежит в ' + keys.map((k) => 'коробке ' + tail(groups.get(k).cargo, 6)).join(', ') + '. Отсканируйте нужную коробку или переложите товар.');
+      feedback('err', 'Этого товара нет в коробке ' + tail(cur.cargo, 6), '«' + g0.article + '» по шаблону лежит в ' + keys.map((k) => 'коробке ' + tail(groups.get(k).cargo, 6)).join(', ') + '. Отсканируйте нужную коробку или переложите товар.', 'err', null, 'Этого товара нет в этой коробке');
       return;
     }
   } else if (keys.length === 1) key = keys[0];
   else {
-    feedback('err', 'Товар есть в нескольких коробках', 'Сначала отсканируйте штрихкод коробки, в которую кладёте этот товар.');
+    feedback('err', 'Товар есть в нескольких коробках', 'Сначала отсканируйте штрихкод коробки, в которую кладёте этот товар.', 'err', null, 'Сначала отсканируйте коробку');
     return;
   }
   const g = groups.get(key);
@@ -1300,9 +1366,9 @@ function onProduct(keys) {
   cur.key = key; cur.cargo = g.cargo; pendingQr = null;
   const left = g.need - g.done;
   const d = describe(productInfo(g));
-  if (left <= 0) { feedback('warn', 'У «' + g.article + '» уже все ' + g.need + ' с QR', 'Если это лишний экземпляр, отложите его: в заявке его нет.'); return; }
+  if (left <= 0) { feedback('warn', 'У «' + g.article + '» уже все ' + g.need + ' с QR', 'Если это лишний экземпляр, отложите его: в заявке его нет.', 'warn', null, 'Этот товар уже собран'); return; }
   if (switched && was.done > 0 && was.done < was.need) {
-    feedback('warn', 'Переключились на ' + g.article, '«' + was.article + '» не закончен: ' + was.done + ' из ' + was.need + '. ' + (d ? d + '. ' : '') + 'Осталось ' + left + ' из ' + g.need + '.', 'product');
+    feedback('warn', 'Переключились на ' + g.article, '«' + was.article + '» не закончен: ' + was.done + ' из ' + was.need + '. ' + (d ? d + '. ' : '') + 'Осталось ' + left + ' из ' + g.need + '.', 'product', null, { text: 'Предыдущий товар не закончен', minor: true });
     return;
   }
   feedback('info', (switched ? 'Переключились на ' : 'Товар: ') + g.article, (d ? d + '. ' : '') + 'Сканируйте QR-коды экземпляров, осталось ' + left + ' из ' + g.need + '.', 'product');
@@ -1311,27 +1377,27 @@ function onQr(code, layoutFixed, idle) {
   const at = qrIndex.get(code);
   if (at !== undefined) {
     const r = rows[at], g = groups.get(r.key);
-    if (cur.key === r.key || cur.prev === r.key || lastQr === code) feedback('warn', 'Этот QR уже привязан', code + ' уже стоит у «' + g.article + '» (строка ' + r.r + '). Повтор пропущен.');
-    else feedback('err', 'QR уже стоит у другого товара', code + ' привязан к «' + g.article + '» (строка ' + r.r + '). Одна этикетка — один экземпляр: проверьте, не перепутаны ли товары.');
+    if (cur.key === r.key || cur.prev === r.key || lastQr === code) feedback('warn', 'Этот QR уже привязан', code + ' уже стоит у «' + g.article + '» (строка ' + r.r + '). Повтор пропущен.', 'warn', null, { text: 'Уже привязан', minor: true });
+    else feedback('err', 'QR уже стоит у другого товара', code + ' привязан к «' + g.article + '» (строка ' + r.r + '). Одна этикетка — один экземпляр: проверьте, не перепутаны ли товары.', 'err', null, 'Эта этикетка уже у другого товара');
     return;
   }
   const h = historyConflict(code);
-  if (h) { feedback('err', 'QR уже был в другой поставке', code + ' использован в файле «' + h[0] + '» (' + fmtDate(h[2]) + ', ' + h[1] + '). Возьмите новую этикетку.'); return; }
+  if (h) { feedback('err', 'QR уже был в другой поставке', code + ' использован в файле «' + h[0] + '» (' + fmtDate(h[2]) + ', ' + h[1] + '). Возьмите новую этикетку.', 'err', null, 'Этикетка из прошлой поставки. Возьмите новую'); return; }
   if (cur.key && opts.pauseMin && idle > opts.pauseMin * 60000) {
     const g0 = groups.get(cur.key);
     cur.prev = cur.key; cur.key = null; pendingQr = null;
-    feedback('err', 'Была пауза: отсканируйте товар заново', 'С последнего скана прошло больше ' + opts.pauseMin + ' мин. Чтобы не привязать QR не к тому товару, отсканируйте штрихкод изделия ещё раз. До паузы был выбран «' + g0.article + '».');
+    feedback('err', 'Была пауза: отсканируйте товар заново', 'С последнего скана прошло больше ' + opts.pauseMin + ' мин. Чтобы не привязать QR не к тому товару, отсканируйте штрихкод изделия ещё раз. До паузы был выбран «' + g0.article + '».', 'err', null, 'Была пауза. Отсканируйте товар заново');
     return;
   }
   if (!cur.key) {
     const p = cur.prev ? groups.get(cur.prev) : null;
-    if (p && p.done === p.need) feedback('err', '«' + p.article + '» уже собран', 'Все ' + p.need + ' из ' + p.need + ' с QR. Если это ещё один экземпляр этого товара, он лишний. Если другой товар — сначала отсканируйте его штрихкод.');
-    else feedback('err', 'Сначала отсканируйте товар', cargos.length > 1 && !cur.explicit ? 'Порядок: коробка, товар, затем QR-коды его экземпляров.' : 'Порядок: штрихкод товара, затем QR-коды его экземпляров.');
+    if (p && p.done === p.need) feedback('err', '«' + p.article + '» уже собран', 'Все ' + p.need + ' из ' + p.need + ' с QR. Если это ещё один экземпляр этого товара, он лишний. Если другой товар — сначала отсканируйте его штрихкод.', 'err', null, 'Товар уже собран. Это лишний экземпляр');
+    else feedback('err', 'Сначала отсканируйте товар', cargos.length > 1 && !cur.explicit ? 'Порядок: коробка, товар, затем QR-коды его экземпляров.' : 'Порядок: штрихкод товара, затем QR-коды его экземпляров.', 'err', null, cargos.length > 1 && !cur.explicit ? 'Сначала отсканируйте коробку и товар' : 'Сначала отсканируйте товар');
     return;
   }
   const g = groups.get(cur.key);
   const free = freeSlot(g);
-  if (free === undefined) { feedback('err', 'У «' + g.article + '» уже все ' + g.need + ' с QR', 'Лишний экземпляр или другой товар: отсканируйте его штрихкод.'); return; }
+  if (free === undefined) { feedback('err', 'У «' + g.article + '» уже все ' + g.need + ' с QR', 'Лишний экземпляр или другой товар: отсканируйте его штрихкод.', 'err', null, 'У этого товара уже все коды'); return; }
   const num = qrNum(code);
   let confirmed = false, far = false;
   if (opts.batchCheck) {
@@ -1339,7 +1405,7 @@ function onQr(code, layoutFixed, idle) {
     confirmed = !!(pendingQr && pendingQr.code === code && pendingQr.key === g.key && Date.now() - pendingQr.at < 120000);
     if (other && !confirmed) {
       pendingQr = { code: code, key: g.key, at: Date.now() };
-      feedback('warn', 'Похоже на этикетку из пачки «' + other.article + '»', 'Номер ' + code + ' попадает между этикетками того товара. Проверьте изделие. Если всё верно, отсканируйте этот же QR ещё раз — привяжу к «' + g.article + '».');
+      feedback('warn', 'Похоже на этикетку из пачки «' + other.article + '»', 'Номер ' + code + ' попадает между этикетками того товара. Проверьте изделие. Если всё верно, отсканируйте этот же QR ещё раз — привяжу к «' + g.article + '».', 'warn', null, 'Похоже на этикетку другого товара. Проверьте и отсканируйте ещё раз');
       return;
     }
     const own = groupRange(g);
@@ -1353,7 +1419,13 @@ function onQr(code, layoutFixed, idle) {
   const t = totals();
   const extra = (layoutFixed ? ' Раскладку исправил автоматически.' : '') + (confirmed ? ' Подтверждено повторным сканом.' : '') + (far ? ' Номер далеко от остальных этикеток этого товара — проверьте изделие.' : '');
   if (t.done === t.need) { feedback('ok', 'Все ' + fmtN(t.need) + ' экземпляров привязаны', 'Скачайте файл и загрузите его в заявку.' + extra, 'all'); cur.prev = g.key; cur.key = null; return; }
-  if (g.done === g.need) { feedback('ok', g.article + ' готов', 'Все ' + g.need + ' из ' + g.need + '. Отсканируйте штрихкод следующего товара.' + extra, 'group'); cur.prev = g.key; cur.key = null; return; }
+  if (g.done === g.need) {
+    const bs = cargos.length > 1 ? boxStats(g.cargo) : null;
+    if (bs && bs.done === bs.need) feedback('ok', boxName(g.cargo) + ' собрана', g.article + ' готов, и в этой коробке всё привязано: ' + bs.done + ' из ' + bs.need + '. Переходите к следующей коробке.' + extra, 'all');
+    else feedback('ok', g.article + ' готов', 'Все ' + g.need + ' из ' + g.need + '. Отсканируйте штрихкод следующего товара.' + extra, 'group');
+    cur.prev = g.key; cur.key = null;
+    return;
+  }
   feedback(far ? 'warn' : 'ok', 'Привязан ' + code, g.article + ': ' + g.done + ' из ' + g.need + '.' + extra, 'ok');
   if (opts.strict) { cur.prev = cur.key; cur.key = null; }
 }
@@ -1424,7 +1496,7 @@ function verifyScan(v) {
   if (matchCargo(v)) { feedback('info', 'Это штрихкод коробки', 'В режиме проверки коробки сканировать не нужно.'); return; }
   const keys = matchProduct(v);
   if (keys.length) { verifyProduct(keys); return; }
-  feedback('err', 'Этого кода нет в поставке', '«' + v + '» — не QR и не штрихкод товара из шаблона.');
+  feedback('err', 'Этого кода нет в поставке', '«' + v + '» — не QR и не штрихкод товара из шаблона.', 'err', null, 'Этого кода нет в поставке');
 }
 function verifyQr(code) {
   const at = qrIndex.get(code);
@@ -1433,7 +1505,7 @@ function verifyQr(code) {
     verify.qr = null; verify.key = null; verify.shown = pend ? pend.key : null;
     const can = pend && freeSlot(pend) !== undefined;
     feedback('err', 'Этот QR ни к чему не привязан', code + ' нет в файле.' + (pend ? (can ? ' Можно привязать его к «' + pend.article + '».' : ' У «' + pend.article + '» нет свободных мест.') : ''), 'err',
-      can ? [{ label: 'Привязать к «' + pend.article + '»', primary: true, fn: () => bindTo(code, pend.key) }] : []);
+      can ? [{ label: 'Привязать к «' + pend.article + '»', primary: true, fn: () => bindTo(code, pend.key) }] : [], 'Этот код ни к чему не привязан');
     return;
   }
   const row = rows[at];
@@ -1460,7 +1532,7 @@ function compareBinding(code, row, key) {
   const gy = groups.get(row.key), gx = groups.get(key);
   const can = freeSlot(gx) !== undefined;
   feedback('err', 'Не совпадает', code + ' привязан к «' + gy.article + '», а изделие — «' + gx.article + '».' + (can ? '' : ' У «' + gx.article + '» нет свободных мест: сначала уберите лишний код в списке товаров.'), 'err',
-    can ? [{ label: 'Перепривязать к «' + gx.article + '»', primary: true, fn: () => rebind(code, key) }] : []);
+    can ? [{ label: 'Перепривязать к «' + gx.article + '»', primary: true, fn: () => rebind(code, key) }] : [], 'Не совпадает');
 }
 function rebind(code, key) {
   const at = qrIndex.get(code), g = groups.get(key), free = freeSlot(g);
@@ -1830,7 +1902,7 @@ function renderLabel(t, complete) {
   }
   const multi = cargos.length > 1;
   $('boxChip').hidden = verify.on || (!multi && !cur.cargo);
-  $('boxText').textContent = cur.cargo ? 'Коробка ' + tail(cur.cargo, 6) : 'Коробка не выбрана';
+  $('boxText').textContent = cur.cargo ? (multi ? boxName(cur.cargo) + ' из ' + cargos.length + ', ' + tail(cur.cargo, 6) : 'Коробка ' + tail(cur.cargo, 6)) : 'Коробка не выбрана';
   if (verify.on) {
     const g = verify.shown ? groups.get(verify.shown) : null;
     setRing(verified.size, t.done, t.done > 0 && verified.size >= t.done);
@@ -1864,38 +1936,66 @@ function renderLabel(t, complete) {
     $('hint').textContent = wantBox ? 'Штрихкод грузоместа, затем товары из него и их QR-коды' : 'Штрихкод с этикетки товара, затем QR-коды всех его экземпляров';
   }
 }
+function itemHtml(g, words) {
+  const multi = cargos.length > 1;
+  const done = g.done === g.need;
+  if (filter === 'todo' && done) return '';
+  if (filter === 'done' && !done) return '';
+  const info = productInfo(g);
+  const sub = [info.colors.map((c) => c.name).join(' / '), info.size ? info.size.main : '', info.gender || '', g.barcode].filter(Boolean).join(', ');
+  const hay = (g.article + ' ' + sub + ' ' + (info.name || '') + (multi ? ' ' + boxName(g.cargo) : '')).toLowerCase().replace(/–/g, '-');
+  if (words.length && !words.every((w) => hay.indexOf(w) >= 0)) return '';
+  const key = g.key;
+  const pct = g.need ? Math.round(100 * g.done / g.need) : 0;
+  const open = expanded.has(key);
+  const vcount = verify.on ? g.idx.filter((i) => rows[i].qr && verified.has(rows[i].qr)).length : 0;
+  const cls = 'item' + (multi ? ' in-box' : '') + (key === cur.key && !verify.on ? ' cur' : '') + (verify.on && key === verify.shown ? ' cur' : '') + (done ? ' done' : (g.done ? ' part' : ''));
+  const tip = pickAlias ? 'Нажмите, чтобы запомнить штрихкод для этого товара' : (verify.on ? 'Нажмите, чтобы сверить с этим товаром' : (key === cur.key ? 'Нажмите ещё раз, чтобы снять выбор' : 'Нажмите, чтобы выбрать вручную'));
+  let html = '<li class="' + cls + '" data-key="' + esc(key) + '" style="--p:' + pct + '%" title="' + esc(tip) + '">' +
+    '<span class="st">' + (done ? svg('check') : '') + '</span>' +
+    '<div class="it-main"><b>' + esc(g.article || '(без артикула)') + '</b><span>' + swatches(info) + esc(sub) + '</span></div>' +
+    '<div class="it-prog"><span class="bar"><span style="width:' + pct + '%"></span></span><span class="n">' + g.done + ' из ' + g.need + (verify.on ? ', сверено ' + vcount : '') + '</span></div>' +
+    '<button class="exp" type="button" data-act="toggle" aria-expanded="' + open + '" aria-label="Показать QR-коды товара">' + svg('chevron') + '</button></li>';
+  if (open) {
+    html += '<li class="codes-row' + (multi ? ' in-box' : '') + '"><ul class="codes">' + g.idx.map((i) => {
+      const r = rows[i];
+      return '<li><span class="rn">строка ' + r.r + '</span>' + (r.qr ? '<span>' + esc(r.qr) + (verified.has(r.qr) ? ' ✓' : '') + '</span><button class="x" type="button" data-act="del" data-i="' + i + '">Убрать</button>' : '<span class="empty">ещё нет QR</span>') + '</li>';
+    }).join('') + '</ul></li>';
+  }
+  return html;
+}
+function boxIsOpen(c) {
+  if (boxOpen.has(c)) return boxOpen.get(c);
+  const st = boxStats(c);
+  return st.done < st.need || c === cur.cargo;
+}
 function renderItems() {
   const words = query.trim().toLowerCase().replace(/–/g, '-').split(/\s+/).filter(Boolean);
   const multi = cargos.length > 1;
   let cAll = 0, cTodo = 0, cDone = 0, html = '';
-  for (const key of order) {
-    const g = groups.get(key);
-    const done = g.done === g.need;
-    cAll++; if (done) cDone++; else cTodo++;
-    if (filter === 'todo' && done) continue;
-    if (filter === 'done' && !done) continue;
-    const info = productInfo(g);
-    const sub = [info.colors.map((c) => c.name).join(' / '), info.size ? info.size.main : '', info.gender || '', g.barcode, multi ? 'коробка ' + tail(g.cargo, 6) : ''].filter(Boolean).join(', ');
-    const hay = (g.article + ' ' + sub + ' ' + (info.name || '')).toLowerCase().replace(/–/g, '-');
-    if (words.length && !words.every((w) => hay.indexOf(w) >= 0)) continue;
-    const pct = g.need ? Math.round(100 * g.done / g.need) : 0;
-    const open = expanded.has(key);
-    const vcount = verify.on ? g.idx.filter((i) => rows[i].qr && verified.has(rows[i].qr)).length : 0;
-    const cls = 'item' + (key === cur.key && !verify.on ? ' cur' : '') + (verify.on && key === verify.shown ? ' cur' : '') + (done ? ' done' : (g.done ? ' part' : ''));
-    const tip = pickAlias ? 'Нажмите, чтобы запомнить штрихкод для этого товара' : (verify.on ? 'Нажмите, чтобы сверить с этим товаром' : (key === cur.key ? 'Нажмите ещё раз, чтобы снять выбор' : 'Нажмите, чтобы выбрать вручную'));
-    html += '<li class="' + cls + '" data-key="' + esc(key) + '" style="--p:' + pct + '%" title="' + esc(tip) + '">' +
-      '<span class="st">' + (done ? svg('check') : '') + '</span>' +
-      '<div class="it-main"><b>' + esc(g.article || '(без артикула)') + '</b><span>' + swatches(info) + esc(sub) + '</span></div>' +
-      '<div class="it-prog"><span class="bar"><span style="width:' + pct + '%"></span></span><span class="n">' + g.done + ' из ' + g.need + (verify.on ? ', сверено ' + vcount : '') + '</span></div>' +
-      '<button class="exp" type="button" data-act="toggle" aria-expanded="' + open + '" aria-label="Показать QR-коды товара">' + svg('chevron') + '</button></li>';
-    if (open) {
-      html += '<li class="codes-row"><ul class="codes">' + g.idx.map((i) => {
-        const r = rows[i];
-        return '<li><span class="rn">строка ' + r.r + '</span>' + (r.qr ? '<span>' + esc(r.qr) + (verified.has(r.qr) ? ' ✓' : '') + '</span><button class="x" type="button" data-act="del" data-i="' + i + '">Убрать</button>' : '<span class="empty">ещё нет QR</span>') + '</li>';
-      }).join('') + '</ul></li>';
+  for (const g of groups.values()) { cAll++; if (g.done === g.need) cDone++; else cTodo++; }
+  if (!multi) {
+    for (const key of order) html += itemHtml(groups.get(key), words);
+  } else {
+    for (const b of boxes) {
+      const keys = order.filter((k) => groups.get(k).cargo === b.cargo);
+      const inner = keys.map((k) => itemHtml(groups.get(k), words)).join('');
+      const filtered = words.length > 0 || filter !== 'all';
+      if (filtered && !inner) continue;
+      const st = boxStats(b.cargo);
+      const complete = st.done === st.need;
+      const open = words.length > 0 || boxIsOpen(b.cargo);
+      const pct = st.need ? Math.round(100 * st.done / st.need) : 0;
+      const isCur = b.cargo === cur.cargo && cur.explicit;
+      html += '<li class="box-head' + (isCur ? ' cur' : '') + (complete ? ' done' : '') + '" data-box="' + esc(b.cargo) + '" title="Нажмите, чтобы выбрать эту коробку">' +
+        '<button class="exp" type="button" data-act="box" aria-expanded="' + open + '" aria-label="' + (open ? 'Свернуть' : 'Развернуть') + ' ' + esc(boxName(b.cargo)) + '">' + svg('chevron') + '</button>' +
+        '<div class="bh-main"><b>' + esc(boxName(b.cargo)) + (complete ? ' собрана' : '') + '</b><span>' + esc(tail(b.cargo, 6) + ', ' + st.n + ' ' + plural(st.n, 'товар', 'товара', 'товаров') + (isCur ? ', сейчас собираем' : '')) + '</span></div>' +
+        '<div class="it-prog"><span class="bar' + (complete ? ' full' : '') + '"><span style="width:' + pct + '%"></span></span><span class="n">' + st.done + ' из ' + st.need + '</span></div></li>';
+      if (open) html += inner;
     }
   }
   $('items').classList.toggle('picking', !!pickAlias);
+  $('items').classList.toggle('boxed', multi);
   $('items').innerHTML = html || '<li class="nothing">' + (words.length ? 'Ничего не найдено по запросу «' + esc(query) + '».' : (filter === 'todo' ? 'Все товары готовы.' : 'Пока ни один товар не готов.')) + '</li>';
   $('cAll').textContent = cAll; $('cTodo').textContent = cTodo; $('cDone').textContent = cDone;
   for (const b of $('filters').children) b.setAttribute('aria-pressed', String(b.dataset.f === filter));
@@ -1909,6 +2009,8 @@ function renderSide(t, complete) {
   const doneGroups = gs.filter((g) => g.done === g.need).length;
   $('statGroups').textContent = doneGroups + ' из ' + gs.length;
   $('statLeft').textContent = fmtN(t.need - t.done);
+  $('statBoxesCell').hidden = cargos.length < 2;
+  if (cargos.length > 1) $('statBoxes').textContent = boxes.filter((b) => { const x = boxStats(b.cargo); return x.done === x.need; }).length + ' из ' + boxes.length;
   const errs = loadIssues.filter((x) => x.lvl === 'err').length;
   const conflicts = rows.filter((r) => r.qr && historyConflict(r.qr));
   const pill = $('readyPill');
@@ -1972,7 +2074,7 @@ window.addEventListener('blur', () => setTimeout(updateScanner, 300));
 /* pressing a button or a product row keeps the scanner field focused: no blur, nothing shifts under the cursor, scans keep landing */
 document.addEventListener('mousedown', (e) => {
   if (screen !== 'work' || document.activeElement !== scanInput) return;
-  const t = e.target && e.target.closest ? e.target.closest('button, li.item, .chip') : null;
+  const t = e.target && e.target.closest ? e.target.closest('button, li.item, li.box-head, .chip') : null;
   if (t) e.preventDefault();
 });
 document.addEventListener('click', (e) => { if (e.target && e.target.closest && e.target.closest('select')) return; setTimeout(refocus, 0); });
@@ -2040,10 +2142,38 @@ $('optSound').addEventListener('change', (e) => { opts.sound = e.target.checked;
 $('optVolume').value = String(opts.volume == null ? 80 : opts.volume);
 $('optVolume').addEventListener('input', (e) => { opts.volume = +e.target.value; store.set(OKEY, opts); });
 $('optVolume').addEventListener('change', () => { const was = opts.sound; opts.sound = true; SND.ok(); opts.sound = was; });
-$('panelSet').addEventListener('click', (e) => { const b = e.target.closest('[data-snd]'); if (!b) return; const was = opts.sound; opts.sound = true; (SND[b.dataset.snd] || SND.ok)(); opts.sound = was; });
+$('panelSet').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-snd]');
+  if (!b) return;
+  const was = opts.sound; opts.sound = true;
+  if (b.dataset.snd === 'voice') { hush(); SND.errShort(); speak('Сначала отсканируйте товар', 330); }
+  else (SND[b.dataset.snd] || SND.ok)();
+  opts.sound = was;
+});
+function renderVoices() {
+  loadVoices();
+  const sel = $('optVoiceName');
+  sel.innerHTML = ruVoices.map((v) => '<option value="' + esc(v.name) + '">' + esc(v.name.replace(/^Microsoft\s+/, '').replace(/\s*-\s*Russian.*$/i, '')) + '</option>').join('');
+  const v = pickVoice();
+  if (v) sel.value = v.name;
+  $('voicePickRow').hidden = !ruVoices.length || opts.voice === 'off';
+  $('voiceHint').hidden = ruVoices.length > 0 || opts.voice === 'off';
+}
+$('optVoice').value = opts.voice || 'err';
+$('optVoice').addEventListener('change', (e) => { opts.voice = e.target.value; store.set(OKEY, opts); renderVoices(); e.target.blur(); setTimeout(refocus, 0); if (opts.voice !== 'off') { hush(); speak('Голосовые подсказки включены', 0); } });
+$('optVoiceName').addEventListener('change', (e) => { opts.voiceName = e.target.value; store.set(OKEY, opts); e.target.blur(); setTimeout(refocus, 0); hush(); speak('Сначала отсканируйте товар', 0); });
+renderVoices();
+if (synth) { try { synth.addEventListener('voiceschanged', renderVoices); } catch (e) { synth.onvoiceschanged = renderVoices; } }
 $('items').addEventListener('click', (e) => {
   const btn = e.target.closest('[data-act]');
   if (btn && btn.dataset.act === 'del') { removeCode(+btn.dataset.i); return; }
+  const bh = e.target.closest('li.box-head');
+  if (bh) {
+    const c = bh.dataset.box;
+    if (btn && btn.dataset.act === 'box') { boxOpen.set(c, !boxIsOpen(c)); renderItems(); return; }
+    lastActionAt = Date.now(); boxOpen.delete(c); onCargo(c); saveSession(); render(); showLabel();
+    return;
+  }
   const li = e.target.closest('li.item');
   if (!li) return;
   const key = li.dataset.key;
