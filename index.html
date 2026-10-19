@@ -148,6 +148,17 @@ button,input{font:inherit;color:inherit}
 .label-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin-bottom:16px}
 .box{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
 .box .i{width:18px;height:18px}
+.box-tag{position:relative;display:inline-flex;align-items:center;flex-wrap:wrap;gap:4px 10px;min-height:60px;padding:6px 18px 6px 14px;border-radius:14px;border:2px solid var(--ink);line-height:1.1}
+.box-tag .i{width:24px;height:24px;color:var(--muted);flex:none}
+.box-tag .bt-w,.box-tag .bt-of{font-size:17px;font-weight:600}
+.box-tag b{font-size:38px;line-height:1.05;font-weight:700;letter-spacing:-.02em}
+.box-tag .bt-cg{font-size:13px;color:var(--muted)}
+.box-tag em{position:absolute;top:-12px;right:14px;padding:1px 9px;border-radius:999px;background:var(--warn);color:var(--surface);font-style:normal;font-size:12px;font-weight:700;line-height:1.5;white-space:nowrap}
+.box-tag.changed{border-color:var(--warn);background:var(--warn-soft)}
+.box-tag.changed .i{color:var(--warn)}
+.box-tag.full{border-color:var(--go)}
+.box-tag.full .i{color:var(--go)}
+.box-tag.full em{background:var(--go);color:var(--on-go)}
 .scanner{display:inline-flex;align-items:center;gap:8px;padding:6px 12px 6px 10px;border-radius:999px;border:0;background:var(--go-soft);color:var(--go);font-size:14px;font-weight:600;cursor:default}
 .scanner .pulse{width:10px;height:10px;border-radius:50%;background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pulse 1.8s ease-out infinite}
 .scanner.off{background:var(--warn-soft);color:var(--warn);cursor:pointer}
@@ -203,6 +214,8 @@ button,input{font:inherit;color:inherit}
   .ring-txt b{font-size:36px}
   .size-tag{flex-direction:row;flex-wrap:wrap;gap:4px 10px;min-width:0;padding:8px 14px;justify-self:start}
   .size-tag b{font-size:28px}
+  .box-tag{min-height:0;padding:6px 14px 6px 12px}
+  .box-tag b{font-size:30px}
   .label-txt h2{font-size:26px}
   .done-ic{width:72px;height:72px}
   .done-state h2{font-size:24px}
@@ -430,6 +443,7 @@ button,input{font:inherit;color:inherit}
           <div id="labelWork">
             <div class="label-top">
               <span class="box" id="boxChip"><svg class="i" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span id="boxText">Коробка</span></span>
+              <div class="box-tag" id="boxTag" hidden><svg class="i" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span class="bt-w" id="boxWord">Коробка</span><b id="boxNum"></b><span class="bt-of" id="boxOf"></span><span class="bt-cg" id="boxCg"></span><em id="boxChanged" hidden>другая коробка</em></div>
               <div class="label-acts">
                 <button class="scanner" type="button" id="scanner"><span class="pulse"></span><span id="scannerText">Сканер готов</span></button>
                 <button class="btn quiet sm" type="button" id="btnUnselect" hidden><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Снять выбор</button>
@@ -1910,6 +1924,26 @@ function setRing(done, need, full) {
   $('ring').classList.toggle('full', !!full);
   $('ringDone').textContent = done; $('ringNeed').textContent = need;
 }
+// Big box label on the card. When the box was not scanned and a product moved us into another box
+// than the one that got the last QR, it turns orange until the first QR goes into the new box.
+function renderBoxTag() {
+  const c = cur.cargo, b = boxByCargo.get(c) || { n: '?', type: '' };
+  const pallet = /палет|паллет/i.test(b.type);
+  const last = undoStack.length ? rows[undoStack[undoStack.length - 1].i] : null;
+  const st = boxStats(c);
+  const ch = !cur.explicit && !!last && last.cargo !== c;
+  const full = !ch && st.need > 0 && st.done === st.need;
+  const tag = $('boxTag'), em = $('boxChanged');
+  $('boxWord').textContent = pallet ? 'Палета' : 'Коробка';
+  $('boxNum').textContent = b.n;
+  $('boxOf').textContent = 'из ' + cargos.length;
+  $('boxCg').textContent = tail(c, 6);
+  tag.title = 'Грузоместо ' + c;
+  tag.classList.toggle('changed', ch);
+  tag.classList.toggle('full', full);
+  em.textContent = ch ? (pallet ? 'другая палета' : 'другая коробка') : 'собрана';
+  em.hidden = !ch && !full;
+}
 function renderLabel(t, complete) {
   const showDone = complete && !verify.on;
   $('label').classList.toggle('verifying', verify.on);
@@ -1922,8 +1956,11 @@ function renderLabel(t, complete) {
     return;
   }
   const multi = cargos.length > 1;
-  $('boxChip').hidden = verify.on || (!multi && !cur.cargo);
+  const bigBox = multi && !!cur.cargo && !verify.on;
+  $('boxChip').hidden = bigBox || verify.on || (!multi && !cur.cargo);
   $('boxText').textContent = cur.cargo ? (multi ? boxName(cur.cargo) + ' из ' + cargos.length + ', ' + tail(cur.cargo, 6) : 'Коробка ' + tail(cur.cargo, 6)) : 'Коробка не выбрана';
+  $('boxTag').hidden = !bigBox;
+  if (bigBox) renderBoxTag();
   if (verify.on) {
     const g = verify.shown ? groups.get(verify.shown) : null;
     setRing(verified.size, t.done, t.done > 0 && verified.size >= t.done);
@@ -1948,13 +1985,16 @@ function renderLabel(t, complete) {
   } else {
     $('ring').hidden = true; $('bigIc').hidden = false;
     const p = cur.prev ? groups.get(cur.prev) : null;
-    const wantBox = multi && !cur.explicit;
+    const bs = multi && cur.explicit && cur.cargo ? boxStats(cur.cargo) : null;
+    const nextBox = !!bs && bs.need > 0 && bs.done === bs.need;
+    const pallet = nextBox && /палет|паллет/i.test((boxByCargo.get(cur.cargo) || {}).type || '');
+    const wantBox = multi && (!cur.explicit || nextBox);
     $('bigIcSvg').innerHTML = wantBox ? ICON.box : ICON.barcode;
     setProductView(null);
     const finished = !!p && p.done === p.need;
     $('lead').textContent = finished ? p.article + ' готов: ' + p.need + ' из ' + p.need : 'Следующий шаг';
-    $('title').textContent = wantBox ? 'Отсканируйте коробку или товар' : (finished ? 'Отсканируйте следующий товар' : 'Отсканируйте товар');
-    $('hint').textContent = wantBox ? 'Штрихкод грузоместа, затем товары из него и их QR-коды' : 'Штрихкод с этикетки товара, затем QR-коды всех его экземпляров';
+    $('title').textContent = nextBox ? 'Отсканируйте следующую ' + (pallet ? 'палету' : 'коробку') : (wantBox ? 'Отсканируйте коробку или товар' : (finished ? 'Отсканируйте следующий товар' : 'Отсканируйте товар'));
+    $('hint').textContent = nextBox ? boxName(cur.cargo) + ' собрана. Отсканируйте штрихкод следующего грузоместа или выберите его в списке' : (wantBox ? 'Штрихкод грузоместа, затем товары из него и их QR-коды' : 'Штрихкод с этикетки товара, затем QR-коды всех его экземпляров');
   }
 }
 function itemHtml(g, words) {
